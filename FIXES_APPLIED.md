@@ -23,10 +23,10 @@
 - ✅ Les colonnes correspondent maintenant correctement aux time slots
 
 ### 🟡 Proxy Webpack incorrect
-**Problème:** Le proxy pointait vers `http://localhost:8000` au lieu de `http://localhost:8765`
+**Problème:** Le proxy pointait vers `http://localhost:8000` au lieu de `http://localhost:56999`
 
 **Solution appliquée:**
-- ✅ Correction du port dans `webpack.config.dev.js` → `8765`
+- ✅ Correction du port dans `webpack.config.dev.js` → `56999`
 - ✅ Le frontend communique correctement avec le backend Python
 
 ---
@@ -37,7 +37,7 @@
 Double-cliquez sur le raccourci **"Academic Hub"** sur votre Bureau.
 
 **Ce que ça fait:**
-- ✅ Lance automatiquement le backend Python (port 8765)
+- ✅ Lance automatiquement le backend Python (port 56999)
 - ✅ Lance automatiquement le frontend webpack dev server (port 8080)
 - ✅ Ouvre Edge en mode "application" (comme une vraie app)
 - ✅ Aucune fenêtre console n'apparaît
@@ -52,7 +52,7 @@ cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT\python_ai
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app:app --host 127.0.0.1 --port 8765
+uvicorn app:app --host 127.0.0.1 --port 56999
 ```
 
 #### Terminal 2 - Frontend:
@@ -97,7 +97,7 @@ CALENDER-PROJECT/
 │   └── app.js          ← Entry point webpack (minimal)
 ├── css/
 │   └── style.css       ← Styles
-├── webpack.config.dev.js ← Config dev (FIXED: port 8765)
+├── webpack.config.dev.js ← Config dev (FIXED: port 56999)
 ├── python_ai/
 │   ├── app.py          ← Backend FastAPI (FIXED: parsing)
 │   └── requirements.txt
@@ -113,7 +113,7 @@ CALENDER-PROJECT/
 
 ### Backend Python:
 ```bash
-curl http://localhost:8765/health
+curl http://localhost:56999/health
 # Réponse attendue: {"ok":true}
 ```
 
@@ -126,8 +126,8 @@ curl http://localhost:8765/health
 ## EN CAS DE PROBLÈME
 
 ### "Le PDF ne charge pas"
-- Vérifiez que le backend tourne: `curl http://localhost:8765/health`
-- Vérifiez que les ports 8765 et 8080 ne sont pas bloqués
+- Vérifiez que le backend tourne: `curl http://localhost:56999/health`
+- Vérifiez que les ports 56999 et 8080 ne sont pas bloqués
 
 ### "Les heures sont encore incorrectes"
 - Videz le cache du navigateur (Ctrl+Shift+Del)
@@ -148,7 +148,7 @@ npm start
 |---------|--------------|--------|
 | `index.html` | Bugfix: `buildScheduleFromBlocksWithFixedColumns()` - suppression `columnIndex++` | ✅ Les heures ENSAM sont correctes |
 | `python_ai/app.py` | Bugfix: `parse_schedule_from_table()` - mapping direct des colonnes | ✅ Backend extrait correctement |
-| `webpack.config.dev.js` | Fix: proxy port 8000 → 8765 | ✅ Frontend ↔ Backend communication |
+| `webpack.config.dev.js` | Fix: proxy port 8000 → 56999 | ✅ Frontend ↔ Backend communication |
 | `scripts/create-desktop-shortcut.ps1` | Ran | ✅ Raccourci créé sur Bureau |
 | `js/app.js` | Created entry point | ✅ Webpack builds correctly |
 

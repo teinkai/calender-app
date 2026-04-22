@@ -38,7 +38,7 @@
 │            │                                      │                  │
 │  ┌─────────▼──────────────────────────────────────┼─────────────┐   │
 │  │  ┌──────────────────────────────────────────┐  │             │   │
-│  │  │   FASTAPI SERVER (Port 8765)             │  │             │   │
+│  │  │   FASTAPI SERVER (Port 56999)            │  │             │   │
 │  │  │   python_ai/app.py                       │  │             │   │
 │  │  │                                          │  │             │   │
 │  │  │  • /health                               │  │             │   │
@@ -48,14 +48,14 @@
 │  │  │    - FIXED: Time Slot Mapping            │             │   │
 │  │  │    - Returns: [ Events with correct hrs ]│             │   │
 │  │  │                                          │             │   │
-│  │  │  (PORT 8765 - Backend)                   │             │   │
+│  │  │  (PORT 56999 - Backend)                  │             │   │
 │  │  └──────────────────────────────────────────┘             │   │
 │  │                                                            │   │
 │  └────────────────────────────────────────────────────────────┘   │
 │                                                                      │
 │  WEBPACK DEV SERVER (Intermediate)                                 │
 │  ├─ Serves http://localhost:8080                                   │
-│  ├─ Proxies /extract-schedule → http://localhost:8765 ✅ FIXED   │
+│  ├─ Proxies /extract-schedule → http://localhost:56999 ✅ FIXED  │
 │  └─ Hot reload on file changes                                     │
 │                                                                      │
 └─────────────────────────────────────────────────────────────────────┘
@@ -89,7 +89,7 @@
     ┌────────────────────────────────┐
     │ launch-academic-hub.ps1        │
     │                                │
-    │ 1. Check port 8765 (backend)   │
+    │ 1. Check port 56999 (backend)  │
     │    ├─ If free: Start uvicorn   │
     │    └─ If busy: Skip            │
     │                                │
@@ -108,7 +108,7 @@
              ▼
     ┌────────────────────────────────┐
     │  BACKEND RUNNING              │
-    │  ✅ FastAPI on :8765          │
+    │  ✅ FastAPI on :56999         │
     │  ✅ CORS configured           │
     │  ✅ Ready to receive PDFs      │
     └────────────────────────────────┘
@@ -117,7 +117,7 @@
     ┌────────────────────────────────┐
     │  FRONTEND RUNNING             │
     │  ✅ Webpack on :8080          │
-    │  ✅ Proxy configured → :8765  │
+    │  ✅ Proxy configured → :56999 │
     │  ✅ App UI loaded             │
     └────────────────────────────────┘
              │
@@ -179,12 +179,12 @@ Upload PDF
 **Solution:**
 ```powershell
 # Vérifiez les ports
-netstat -ano | findstr :8765  # Backend
+netstat -ano | findstr :56999 # Backend
 netstat -ano | findstr :8080  # Frontend
 
 # Redémarrez manuellement:
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT\python_ai
-.\.venv\Scripts\uvicorn app:app --host 127.0.0.1 --port 8765
+.\.venv\Scripts\uvicorn app:app --host 127.0.0.1 --port 56999
 
 # Terminal 2:
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT
@@ -202,7 +202,7 @@ npm start
 **Solution:**
 1. Vérifiez que le backend tourne:
    ```powershell
-   Invoke-WebRequest http://127.0.0.1:8765/health
+   Invoke-WebRequest http://127.0.0.1:56999/health
    ```
 2. Vérifiez le format du PDF (doit être une table ENSAM standard)
 3. Ouvrez F12 → Network pour voir l'erreur exacte
@@ -224,7 +224,7 @@ npm start
 |---------|--------------|----------|
 | `index.html` | Removed `columnIndex++` in `buildScheduleFromBlocksWithFixedColumns()` | ✅ Hours correct |
 | `python_ai/app.py` | Changed `col_time[col_idx-1]` to `col_time[col_idx]` | ✅ Column mapping fixed |
-| `webpack.config.dev.js` | Port 8000 → 8765 in proxy | ✅ API communication works |
+| `webpack.config.dev.js` | Port 8000 → 56999 in proxy | ✅ API communication works |
 | `js/app.js` | Created minimal entry point | ✅ Webpack builds |
 | `scripts/create-desktop-shortcut.ps1` | Executed to create .lnk | ✅ Desktop shortcut created |
 
@@ -236,7 +236,7 @@ Run this to verify everything:
 
 ```powershell
 # Check backend
-$b = Invoke-WebRequest -Uri "http://127.0.0.1:8765/health" -UseBasicParsing
+$b = Invoke-WebRequest -Uri "http://127.0.0.1:56999/health" -UseBasicParsing
 Write-Host "Backend: $($b.StatusCode) - $($b.Content)"
 
 # Check frontend

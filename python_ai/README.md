@@ -22,17 +22,17 @@ pip install -r requirements.txt
 ```powershell
 Set-Location "C:\Users\hp\IdeaProjects\CALENDER-PROJECT\python_ai"
 .\.venv\Scripts\Activate.ps1
-uvicorn app:app --host 127.0.0.1 --port 8765 --reload
+uvicorn app:app --host 127.0.0.1 --port 56999 --reload
 ```
 
 ## 4) Test rapide
 
 ```powershell
-Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:8765/health"
+Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:56999/health"
 ```
 
 Le front (`index.html`) appelle automatiquement:
-- `POST http://127.0.0.1:8765/extract-schedule`
+- `POST http://127.0.0.1:56999/extract-schedule`
 
 Si le service Python est indisponible, l'app retombe sur l'extracteur navigateur (`pdf.js` + `tesseract.js`).
 

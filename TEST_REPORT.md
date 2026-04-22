@@ -3,9 +3,9 @@
 ## ✅ TOUS LES TESTS PASSENT
 
 ### Status des Services
-- ✅ **Backend Python** - Running on `http://127.0.0.1:8765`
+- ✅ **Backend Python** - Running on `http://127.0.0.1:56999`
   - Health check: `{"ok":true}`
-  - Port: 8765
+  - Port: 56999
   - Status: **ACTIVE**
 
 - ✅ **Frontend Webpack** - Running on `http://127.0.0.1:8080`
@@ -37,7 +37,7 @@
 # Terminal 1 - Backend
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT\python_ai
 .\.venv\Scripts\activate
-uvicorn app:app --host 127.0.0.1 --port 8765
+uvicorn app:app --host 127.0.0.1 --port 56999
 
 # Terminal 2 - Frontend
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT
@@ -68,7 +68,7 @@ Puis ouvrez: `http://localhost:8080`
 
 ### Bug #3: Proxy webpack incorrect ✅ FIXED
 **Fichier:** `webpack.config.dev.js`
-**Port:** 8000 → 8765
+**Port:** 8000 → 56999
 **Résultat:** Frontend communique correctement avec le backend
 
 ---
@@ -79,7 +79,17 @@ Puis ouvrez: `http://localhost:8080`
 1. Cliquez sur **"Calendrier"** dans la sidebar
 2. Cliquez sur **"📥 ENSAM"** (bouton bleu en haut à droite)
 3. Sélectionnez la date de début de semaine
-4. Uploadez votre fichier PDF ENSAM
+4. Choisissez le mode d'import:
+   - **Remplacer**: supprime les anciens imports ENSAM avant insertion
+   - **Ajouter**: conserve les imports ENSAM existants et ajoute les nouveaux (avec anti-doublon exact)
+5. Uploadez votre fichier PDF ENSAM
+6. Vérifiez la **prévisualisation** puis cliquez **Importer**
+
+### Debug Import
+- Bouton **Copier les erreurs** dans la modale ENSAM
+- Copie dans le presse-papiers:
+  - erreurs de fallback (Python IA / PDF / OCR)
+  - dernier statut d'import affiché
 
 ### Format ENSAM Accepté:
 ```
@@ -113,7 +123,7 @@ GET  /health                    # {"ok": true}
 POST /extract-schedule          # Extraction PDF
 
 # Ports:
-- Écoute: 127.0.0.1:8765
+- Écoute: 127.0.0.1:56999
 - CORS: localhost:8080 autorisé
 ```
 
@@ -123,7 +133,7 @@ POST /extract-schedule          # Extraction PDF
 - Port: 8080
 - Live reload: Activé
 - Hot reload: Activé
-- Proxy: /extract-schedule → localhost:8765
+- Proxy: /extract-schedule → localhost:56999
 - Static files: ./ (racine du projet)
 ```
 
@@ -139,7 +149,7 @@ POST /extract-schedule          # Extraction PDF
 - Exécute: launch-academic-hub.ps1
 
 # launch-academic-hub.ps1
-- Démarre le backend Python si port 8765 est libre
+- Démarre le backend Python si port 56999 est libre
 - Démarre le frontend npm si webpack n'est pas actif
 - Attend que les deux services soient prêts
 - Lance Edge en mode --app (application window)
@@ -151,7 +161,7 @@ POST /extract-schedule          # Extraction PDF
 
 ### ✅ Test 1: Backend Health Check
 ```powershell
-Invoke-WebRequest -Uri "http://127.0.0.1:8765/health"
+Invoke-WebRequest -Uri "http://127.0.0.1:56999/health"
 # Réponse: {"ok":true}
 # Status: 200 OK
 ```
@@ -166,12 +176,31 @@ Invoke-WebRequest -Uri "http://127.0.0.1:8080"
 ### ✅ Test 3: CORS Configuration
 ```javascript
 // La requête suivante depuis le frontend doit fonctionner:
-fetch('http://127.0.0.1:8765/extract-schedule', {
+fetch('http://127.0.0.1:56999/extract-schedule', {
   method: 'POST',
   headers: { 'Content-Type': 'multipart/form-data' }
 })
 // Pas d'erreur CORS ✅
 ```
+
+### ✅ Test 4: Cas difficiles (trous de créneaux)
+Validation ciblée exécutée sur parser ENSAM avec des cellules vides:
+
+- Lundi: matin vide, cours seulement à 14:00 et 16:15
+- Mardi: trou à 10:45 et 14:00
+
+Sortie vérifiée:
+
+```text
+2026-04-13 14:00-16:00 Cloud Security
+2026-04-13 16:15-18:00 Projet
+2026-04-14 08:30-10:30 WAF
+2026-04-14 16:15-18:00 Management
+```
+
+Conclusion:
+- ✅ Les séances d'après-midi ne sont plus décalées vers le matin
+- ✅ Les créneaux vides restent vides
 
 ---
 
@@ -185,7 +214,7 @@ CALENDER-PROJECT/
 │   └── vendor/            ← Bibliothèques externes
 ├── css/
 │   └── style.css          ← Styles
-├── webpack.config.dev.js  ← Config dev (FIXED: port 8765)
+├── webpack.config.dev.js  ← Config dev (FIXED: port 56999)
 ├── webpack.config.prod.js ← Config production
 ├── webpack.common.js      ← Config commune
 ├── package.json           ← Dépendances npm
@@ -219,7 +248,7 @@ CALENDER-PROJECT/
 ### En cas de problème:
 - Consultez le fichier `FIXES_APPLIED.md`
 - Ouvrez la console du navigateur (F12) pour les logs
-- Vérifiez que les ports 8765 et 8080 ne sont pas bloqués
+- Vérifiez que les ports 56999 et 8080 ne sont pas bloqués
 
 ---
 
@@ -228,10 +257,10 @@ CALENDER-PROJECT/
 ### Logs de débogage:
 1. **Frontend:** Appuyez sur F12 → Console
 2. **Backend:** Regardez le terminal PowerShell du backend
-3. **Système:** Vérifiez les ports: `netstat -ano | findstr :8765` ou `:8080`
+3. **Système:** Vérifiez les ports: `netstat -ano | findstr :56999` ou `:8080`
 
 ### Ports utilisés:
-- ✅ `8765` - Backend Python (FastAPI)
+- ✅ `56999` - Backend Python (FastAPI)
 - ✅ `8080` - Frontend (Webpack dev server)
 
 ---

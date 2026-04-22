@@ -44,7 +44,7 @@ col_time[col_idx] = slot  # ✅ Mapping direct
 ---
 
 ### PROBLÈME 3: Webpack proxy pointait sur le mauvais port
-**Cause:** Le proxy était configuré sur `localhost:8000` au lieu de `localhost:8765`
+**Cause:** Le proxy était configuré sur `localhost:8000` au lieu de `localhost:56999`
 - Les requêtes du frontend ne pouvaient pas atteindre le backend
 
 **Solution appliquée:**
@@ -58,7 +58,7 @@ proxy: [{
 // APRÈS (CORRECT):
 proxy: [{
   context: ['/extract-schedule'],
-  target: 'http://localhost:8765',  // ✅ BON PORT
+  target: 'http://localhost:56999',  // ✅ BON PORT
 }]
 ```
 
@@ -72,7 +72,7 @@ proxy: [{
 Le raccourci est automatiquement créé à: `C:\Users\hp\Desktop\Academic Hub.lnk`
 
 ### 2. Attendez 3-5 secondes
-- Backend Python démarre (8765)
+- Backend Python démarre (56999)
 - Frontend Webpack démarre (8080)
 - La fenêtre Edge s'ouvre automatiquement
 
@@ -85,7 +85,7 @@ L'application est prête à l'emploi - pas de console, pas de configuration supp
 
 ### ✅ Test Backend
 ```
-Request: GET http://127.0.0.1:8765/health
+Request: GET http://127.0.0.1:56999/health
 Response: {"ok":true}
 Status: 200 OK
 Result: ✅ PASS
@@ -138,7 +138,7 @@ Result: ✅ PASS
 
 ### 3. `webpack.config.dev.js` (Configuration)
 **Ligne:** 14
-**Changement:** Port proxy 8000 → 8765
+**Changement:** Port proxy 8000 → 56999
 
 **Impact:** ✅ Frontend communique avec le backend
 
@@ -201,7 +201,7 @@ Si vous voulez vérifier que tout fonctionne correctement:
 
 ```powershell
 # 1. Vérifier le backend
-Invoke-WebRequest -Uri "http://127.0.0.1:8765/health" -UseBasicParsing
+Invoke-WebRequest -Uri "http://127.0.0.1:56999/health" -UseBasicParsing
 
 # 2. Vérifier le frontend
 Invoke-WebRequest -Uri "http://127.0.0.1:8080" -UseBasicParsing
@@ -225,7 +225,7 @@ python -m pip list | findstr fastapi
 
 ### "Le PDF ne s'importe pas du tout"
 1. Ouvrez F12 → Console pour voir l'erreur
-2. Vérifiez que le backend tourne: `http://127.0.0.1:8765/health`
+2. Vérifiez que le backend tourne: `http://127.0.0.1:56999/health`
 3. Vérifiez que le format du PDF est correct (table ENSAM standard)
 
 ### "Le raccourci ne fonctionne pas"
@@ -251,7 +251,7 @@ npm start
 2. **VBS lance** PowerShell en mode caché (no console window)
 3. **PowerShell exécute** le script de lancement
 4. **Le script:**
-   - Démarre le backend Python sur le port 8765
+   - Démarre le backend Python sur le port 56999
    - Démarre le frontend Webpack sur le port 8080
    - Attend que les deux services soient prêts (health checks)
    - Lance Edge en mode `--app=http://localhost:8080`

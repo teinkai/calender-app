@@ -12,7 +12,7 @@
 ┌────────────────────────────────────────────────────────────┐
 │                   SERVICES STATUS                          │
 ├────────────────────────────────────────────────────────────┤
-│ Backend (FastAPI)        │ ✅ RUNNING   │ Port 8765       │
+│ Backend (FastAPI)        │ ✅ RUNNING   │ Port 56999      │
 │ Frontend (Webpack)       │ ✅ RUNNING   │ Port 8080       │
 │ Desktop Shortcut         │ ✅ CREATED   │ ~/Desktop/      │
 │ Build Output             │ ✅ SUCCESS   │ dist/ ready     │
@@ -52,7 +52,7 @@
 ### Bug #3: Webpack Proxy Port ✅ FIXED
 | Before | After |
 |--------|-------|
-| Port 8000 ❌ | Port 8765 ✅ |
+| Port 8000 ❌ | Port 56999 ✅ |
 | API calls fail | API calls work |
 | CORS errors | No errors |
 
@@ -67,7 +67,7 @@
 PROJECT FILES CHANGED:
 ├── ✅ index.html                    [FIXED: columnIndex++]
 ├── ✅ python_ai/app.py              [FIXED: col_time mapping]
-├── ✅ webpack.config.dev.js         [FIXED: proxy port 8765]
+├── ✅ webpack.config.dev.js         [FIXED: proxy port 56999]
 ├── ✅ js/app.js                     [CREATED: webpack entry]
 │
 DOCUMENTATION CREATED:
@@ -87,7 +87,7 @@ SCRIPTS EXECUTED:
 ### ✅ Test 1: Backend Health Check
 ```
 Endpoint: GET /health
-Port: 8765
+Port: 56999
 Response: {"ok":true}
 Status Code: 200
 Result: ✅ PASS
@@ -139,7 +139,7 @@ Result: ✅ NO ERRORS
 # Terminal 1: Backend
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT\python_ai
 .\.venv\Scripts\activate
-uvicorn app:app --host 127.0.0.1 --port 8765
+uvicorn app:app --host 127.0.0.1 --port 56999
 
 # Terminal 2: Frontend
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT
@@ -175,9 +175,9 @@ FRONTEND (Port 8080)
     ├── Ideas & Notes
     └── ENSAM Import Handler
         └── Calls /extract-schedule API
-            └── Proxy to Backend:8765
+            └── Proxy to Backend:56999
 
-BACKEND (Port 8765)
+BACKEND (Port 56999)
 └── python_ai/app.py (FastAPI)
     ├── Health Endpoint
     └── PDF Extraction Endpoint
@@ -219,7 +219,7 @@ Allowed Origins:
 
 ### Port Binding
 ```
-✅ Backend: 127.0.0.1:8765 (localhost only)
+✅ Backend: 127.0.0.1:56999 (localhost only)
 ✅ Frontend: 0.0.0.0:8080 (local development)
 ```
 
@@ -263,9 +263,9 @@ Allowed Origins:
 ## 📞 TROUBLESHOOTING
 
 ### Issue: App doesn't start
-**Solution:** Check ports `8765` and `8080` are free
+**Solution:** Check ports `56999` and `8080` are free
 ```powershell
-netstat -ano | findstr :8765
+netstat -ano | findstr :56999
 netstat -ano | findstr :8080
 ```
 
@@ -275,7 +275,7 @@ netstat -ano | findstr :8080
 ### Issue: PDF import fails
 **Solution:** Verify backend is running
 ```powershell
-Invoke-WebRequest http://127.0.0.1:8765/health
+Invoke-WebRequest http://127.0.0.1:56999/health
 ```
 
 ### Issue: Shortcut not working

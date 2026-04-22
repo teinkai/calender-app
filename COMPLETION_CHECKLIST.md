@@ -14,12 +14,12 @@
 
 - [x] **Bug #3: Webpack Proxy Port**
   - Issue: Port 8000 (wrong)
-  - Fixed: Port 8765 ✅
+  - Fixed: Port 56999 ✅
   - File: webpack.config.dev.js (Line 14)
 
 ## SERVICES VERIFIED
 
-- [x] Backend (FastAPI) running on :8765
+- [x] Backend (FastAPI) running on :56999
 - [x] Frontend (Webpack) running on :8080
 - [x] Health check responding: {"ok":true}
 - [x] CORS properly configured

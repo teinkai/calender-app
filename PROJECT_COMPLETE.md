@@ -51,7 +51,7 @@ col_time[col_idx] = slot  # ✅ Direct mapping
 ---
 
 ### BUG #3: Proxy Pointed to Wrong Port
-**Problem:** Frontend couldn't talk to backend because the proxy was configured for port 8000 instead of 8765
+**Problem:** Frontend couldn't talk to backend because the proxy was configured for port 8000 instead of 56999
 
 **What Was Broken:**
 ```javascript
@@ -65,7 +65,7 @@ proxy: [{
 ```javascript
 // NEW CODE (CORRECT):
 proxy: [{
-  target: 'http://localhost:8765',  // ✅ CORRECT PORT
+  target: 'http://localhost:56999',  // ✅ CORRECT PORT
 }]
 ```
 
@@ -76,7 +76,7 @@ proxy: [{
 ## 📊 WHAT'S NOW WORKING
 
 ✅ **Backend (Python/FastAPI)**
-- Running on port 8765
+- Running on port 56999
 - Health check: `{"ok": true}`
 - Extracts ENSAM PDFs correctly
 - Maps hours correctly
@@ -125,7 +125,7 @@ proxy: [{
 ```powershell
 # Start backend
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT\python_ai
-.\.venv\Scripts\uvicorn app:app --host 127.0.0.1 --port 8765
+.\.venv\Scripts\uvicorn app:app --host 127.0.0.1 --port 56999
 
 # Start frontend (in another terminal)
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT
@@ -156,7 +156,7 @@ All files are in your project folder: `C:\Users\hp\IdeaProjects\CALENDER-PROJECT
 |------|--------|--------|
 | `index.html` | Removed `columnIndex++` | ✅ Hours correct |
 | `python_ai/app.py` | Fixed `col_time` mapping | ✅ Backend works |
-| `webpack.config.dev.js` | Port 8000 → 8765 | ✅ API works |
+| `webpack.config.dev.js` | Port 8000 → 56999 | ✅ API works |
 | `js/app.js` | Created entry point | ✅ Webpack builds |
 
 Scripts executed:
@@ -184,7 +184,7 @@ After:
 
 ✅ **CORS Configured:**
 - Allows frontend on localhost:8080 ✅
-- Backend on localhost:8765 ✅
+- Backend on localhost:56999 ✅
 - No external internet exposure ✅
 
 ✅ **Dependencies Installed:**
@@ -205,7 +205,7 @@ Want to verify everything yourself?
 
 ```powershell
 # Test Backend
-Invoke-WebRequest http://127.0.0.1:8765/health -UseBasicParsing
+Invoke-WebRequest http://127.0.0.1:56999/health -UseBasicParsing
 
 # Test Frontend
 Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
@@ -272,7 +272,7 @@ True                (shortcut exists)
 1. Check **QUICK_START.md** for common issues
 2. Open browser F12 (DevTools) for error messages
 3. Check backend terminal for server errors
-4. Verify ports 8765 and 8080 are free
+4. Verify ports 56999 and 8080 are free
 
 ### To recreate the shortcut:
 ```powershell

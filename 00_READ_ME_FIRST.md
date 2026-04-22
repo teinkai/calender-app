@@ -22,8 +22,8 @@ Your Academic Hub calendar application has been **fully debugged, tested, and is
 **Result:** Backend extracts correct times ✅
 
 ### 3. Proxy Configuration Bug ✅ FIXED
-**Problem:** Webpack proxy pointed to port 8000 instead of 8765
-**Fix:** Updated proxy to `target: 'http://localhost:8765'`
+**Problem:** Webpack proxy pointed to port 8000 instead of 56999
+**Fix:** Updated proxy to `target: 'http://localhost:56999'`
 **File:** `webpack.config.dev.js` (Line 14)
 **Result:** Frontend ↔ Backend communication works ✅
 
@@ -32,7 +32,7 @@ Your Academic Hub calendar application has been **fully debugged, tested, and is
 ## 📊 CURRENT STATUS
 
 ```
-✅ Backend (FastAPI)     - Running on :8765
+✅ Backend (FastAPI)     - Running on :56999
 ✅ Frontend (Webpack)    - Running on :8080
 ✅ Desktop Shortcut      - Created & ready
 ✅ All Services          - Verified working
@@ -51,7 +51,7 @@ Look on your **Desktop** for **"Academic Hub"** icon
 That's it! The app launches automatically
 
 ### Step 3: Wait 3-5 Seconds
-- Backend starts (port 8765)
+- Backend starts (port 56999)
 - Frontend starts (port 8080)
 - Edge opens automatically
 - App is ready ✅
@@ -90,7 +90,7 @@ Run this to verify everything works:
 
 ```powershell
 # Test Backend
-Invoke-WebRequest http://127.0.0.1:8765/health -UseBasicParsing
+Invoke-WebRequest http://127.0.0.1:56999/health -UseBasicParsing
 
 # Test Frontend
 Invoke-WebRequest http://127.0.0.1:8080 -UseBasicParsing
@@ -150,7 +150,7 @@ Stop-Process -Name node -Force -ErrorAction SilentlyContinue
 |------|--------|--------|
 | `index.html` | Removed `columnIndex++` | ✅ Hours correct |
 | `python_ai/app.py` | Fixed column mapping | ✅ Backend works |
-| `webpack.config.dev.js` | Port 8765 in proxy | ✅ API works |
+| `webpack.config.dev.js` | Port 56999 in proxy | ✅ API works |
 | `js/app.js` | Created entry point | ✅ Webpack builds |
 
 ---

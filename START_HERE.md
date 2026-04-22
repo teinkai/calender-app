@@ -23,11 +23,11 @@ The Python backend was using incorrect column indexing when parsing PDFs.
 **Status:** ✅ **FIXED** - Changed to direct column mapping in `python_ai/app.py`
 
 ### 3. **Frontend-Backend Communication Failed**
-The Webpack proxy was pointing to the wrong port (8000 instead of 8765).
+The Webpack proxy was pointing to the wrong port (8000 instead of 56999).
 
 **Root Cause:** Incorrect configuration in `webpack.config.dev.js`
 
-**Status:** ✅ **FIXED** - Updated proxy to port 8765
+**Status:** ✅ **FIXED** - Updated proxy to port 56999
 
 ---
 
@@ -36,12 +36,12 @@ The Webpack proxy was pointing to the wrong port (8000 instead of 8765).
 ### Code Fixes Applied
 - ✅ Fixed `index.html` - Removed `columnIndex++` bug (Line ~1250)
 - ✅ Fixed `python_ai/app.py` - Corrected column mapping (Line ~130)
-- ✅ Fixed `webpack.config.dev.js` - Updated proxy port to 8765 (Line 14)
+- ✅ Fixed `webpack.config.dev.js` - Updated proxy port to 56999 (Line 14)
 - ✅ Created `js/app.js` - Webpack entry point
 - ✅ Recreated desktop shortcut with correct configuration
 
 ### Services Verified
-- ✅ **Backend** - Running on `http://127.0.0.1:8765`
+- ✅ **Backend** - Running on `http://127.0.0.1:56999`
 - ✅ **Frontend** - Running on `http://127.0.0.1:8080`
 - ✅ **Communication** - Working correctly (CORS configured)
 - ✅ **Build** - Webpack compiles successfully
@@ -71,7 +71,7 @@ The Webpack proxy was pointing to the wrong port (8000 instead of 8765).
 # Terminal 1: Backend
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT\python_ai
 .\.venv\Scripts\activate
-uvicorn app:app --host 127.0.0.1 --port 8765
+uvicorn app:app --host 127.0.0.1 --port 56999
 
 # Terminal 2: Frontend
 cd C:\Users\hp\IdeaProjects\CALENDER-PROJECT
@@ -104,12 +104,12 @@ Then open: `http://localhost:8080`
 |------|--------|---------|--------|
 | `index.html` | Removed `columnIndex++` | ~1250 | ✅ Hours correct |
 | `python_ai/app.py` | Direct column mapping | ~130 | ✅ Backend fixed |
-| `webpack.config.dev.js` | Port 8000→8765 | 14 | ✅ API works |
+| `webpack.config.dev.js` | Port 8000→56999 | 14 | ✅ API works |
 
 ### Services & Ports
 | Service | Port | Status |
 |---------|------|--------|
-| Backend (FastAPI) | 8765 | ✅ Running |
+| Backend (FastAPI) | 56999 | ✅ Running |
 | Frontend (Webpack) | 8080 | ✅ Running |
 | Desktop Shortcut | N/A | ✅ Created |
 
@@ -118,7 +118,7 @@ Then open: `http://localhost:8080`
 Your Computer
 ├── Desktop Shortcut (Academic Hub.lnk)
 │   └── Launches both services automatically
-│       ├── Backend: python_ai/app.py → :8765
+│       ├── Backend: python_ai/app.py → :56999
 │       └── Frontend: index.html → :8080 (via webpack)
 │           └── Opens in Edge browser (app mode)
 ```
@@ -131,7 +131,7 @@ Run this in PowerShell:
 
 ```powershell
 # Check Backend
-$b = Invoke-WebRequest http://127.0.0.1:8765/health -UseBasicParsing
+$b = Invoke-WebRequest http://127.0.0.1:56999/health -UseBasicParsing
 Write-Host "Backend: $($b.StatusCode)"
 
 # Check Frontend
@@ -178,7 +178,7 @@ powershell -ExecutionPolicy Bypass -File ".\scripts\create-desktop-shortcut.ps1"
 ### Q: What if the app doesn't start?
 **A:**
 1. Make sure the project folder path hasn't changed
-2. Make sure ports 8765 and 8080 are free
+2. Make sure ports 56999 and 8080 are free
 3. Delete the shortcut and recreate it
 4. Check that npm and Python are installed
 
@@ -202,7 +202,7 @@ powershell -ExecutionPolicy Bypass -File ".\scripts\create-desktop-shortcut.ps1"
 
 ## 🛠️ TROUBLESHOOTING
 
-### Problem: "Port 8765 already in use"
+### Problem: "Port 56999 already in use"
 ```powershell
 # Kill any Python processes
 Stop-Process -Name python -Force -ErrorAction SilentlyContinue
@@ -241,7 +241,7 @@ Stop-Process -Name node -Force -ErrorAction SilentlyContinue
 ### Debugging Tips:
 - Press **F12** in the browser to see errors
 - Check the backend terminal output for errors
-- Verify ports are open: `netstat -ano | findstr :8765`
+- Verify ports are open: `netstat -ano | findstr :56999`
 
 ---
 

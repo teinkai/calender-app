@@ -32,7 +32,7 @@ powershell -ExecutionPolicy Bypass -File ".\scripts\create-desktop-shortcut.ps1"
 ## STEP 3: DOUBLE-CLICK THE SHORTCUT
 
 That's it! The application will:
-1. ✅ Start the Python backend (8765)
+1. ✅ Start the Python backend (56999)
 2. ✅ Start the frontend (8080)
 3. ✅ Open Edge automatically
 4. ✅ Show you the Academic Hub calendar
@@ -67,7 +67,7 @@ That's it! The application will:
 ### 🔴 Bug 3: Proxy Configuration
 - **Before:** Frontend couldn't talk to backend ❌
 - **After:** They communicate perfectly ✅
-- **Fixed in:** `webpack.config.dev.js` (port 8765)
+- **Fixed in:** `webpack.config.dev.js` (port 56999)
 
 ---
 
@@ -77,7 +77,7 @@ If you want to manually verify everything works:
 
 ```powershell
 # Check Backend
-Invoke-WebRequest http://127.0.0.1:8765/health
+Invoke-WebRequest http://127.0.0.1:56999/health
 
 # Check Frontend
 Invoke-WebRequest http://127.0.0.1:8080
@@ -172,7 +172,7 @@ While using the app:
 3. VBS script runs PowerShell silently (no console window)
    ↓
 4. PowerShell starts the backend (if not running)
-   • uvicorn on port 8765
+   • uvicorn on port 56999
    • Waits for health check ✅
    ↓
 5. PowerShell starts the frontend (if not running)
@@ -223,7 +223,7 @@ You'll know it's working when:
 - Backend: `C:\Users\hp\IdeaProjects\CALENDER-PROJECT\python_ai\app.py`
 
 ### Ports Used
-- **8765** - Backend API (FastAPI)
+- **56999** - Backend API (FastAPI)
 - **8080** - Frontend UI (Webpack)
 - Both on localhost (not exposed to internet)
 
