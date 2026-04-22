@@ -1,1 +1,1595 @@
-!function(){if(void 0===window.S)return;const e=["08:00","10:00","12:00","14:00","16:00","18:00","20:00","22:00","00:00"],t=[{key:"today",label:"Jour"},{key:"calendar",label:"Calendrier"},{key:"goals",label:"Objectifs"},{key:"ideas",label:"Idees"},{key:"settings",label:"Reglages"}],n=window.renderView,o=window.renderMonthView,a=window.renderDayView,i=window.openNewEvent,s=window.editEvent,r=window.saveEvent,d=window.viewTitleMap,l=window.taskHTML,c=window.toggleDone;function u(){S.settings=S.settings||{},S.settings.themeMode||(S.settings.themeMode="system"),S.settings.accent||(S.settings.accent="#007AFF"),"boolean"!=typeof S.settings.notifications&&(S.settings.notifications=!0),Array.isArray(S.settings.subjectColors)||(S.settings.subjectColors=window.SUBJECT_COLORS?Object.keys(window.SUBJECT_COLORS).map(function(e){return{name:e,color:window.SUBJECT_COLORS[e]}}):[{name:"WAF",color:"ev-blue"},{name:"Securite",color:"ev-purple"},{name:"Francais",color:"ev-green"},{name:"Anglais",color:"ev-amber"},{name:"Management",color:"ev-red"}]),"boolean"!=typeof S.sidebarCollapsed&&(S.sidebarCollapsed=!1)}function m(e){const t=String(e||"").trim();return/^#[0-9a-fA-F]{3}$/.test(t)?("#"+t[1]+t[1]+t[2]+t[2]+t[3]+t[3]).toLowerCase():/^#[0-9a-fA-F]{6}$/.test(t)?t.toLowerCase():{"ev-blue":"#3b82f6","ev-green":"#10b981","ev-purple":"#8b5cf6","ev-amber":"#f59e0b","ev-red":"#ef4444","ev-pink":"#ec4899"}[e]||"#3b82f6"}function p(e){return m(e)}function v(e,t){const n=m(e||t||"#3b82f6");return"background:"+n+";color:"+function(e){const t=m(e);return(.299*parseInt(t.slice(1,3),16)+.587*parseInt(t.slice(3,5),16)+.114*parseInt(t.slice(5,7),16))/255>.63?"#111827":"#ffffff"}(n)+";"}function g(e){const t=String(e||"").toLowerCase();return"course"===t?"#3b82f6":"sport"===t?"#10b981":"personal"===t?"#ffffff":"project"===t?"#ef4444":"reminder"===t?"#f59e0b":"#3b82f6"}function f(e){if(!e||!String(e).includes(":"))return 0;const t=String(e).split(":").map(Number);return 60*(t[0]||0)+(t[1]||0)}function y(){const t="undefined"!=typeof HOURS&&Array.isArray(HOURS)?HOURS:window.HOURS;return Array.isArray(t)&&t.length?t.filter(function(e){return/^\d{2}:\d{2}$/.test(String(e||""))}):Array.isArray(window.ENSAM_SLOTS)&&window.ENSAM_SLOTS.length?window.ENSAM_SLOTS.map(function(e){return e.start}):e}function b(){return y().map(function(e){return f(e)})}function w(e){return String(e).padStart(2,"0")}function h(){u();const e=S.settings.themeMode,t="dark"===e||"system"===e&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.setAttribute("data-theme",t?"dark":"light"),document.documentElement.style.setProperty("--accent",S.settings.accent||"#007AFF")}function k(e){let t=document.getElementById("toast-wrap");t||(t=document.createElement("div"),t.id="toast-wrap",t.className="toast-wrap",document.body.appendChild(t));const n=document.createElement("div");n.className="toast",n.textContent=e,t.appendChild(n),setTimeout(()=>n.remove(),3600)}function E(){return void 0!==window.Notification}async function x(){return E()?"granted"===Notification.permission?"granted":Notification.requestPermission():(k("Notifications systeme non supportees sur ce navigateur."),"unsupported")}function T(e,t){if(E()&&"granted"===Notification.permission)try{const n=new Notification(e,{body:t});setTimeout(function(){n.close()},5e3)}catch(e){}}function I(e,t,n,o){if(document.getElementById(e))return;const a=document.querySelector(".sidebar-nav .nav-section:last-child");if(!a)return;const i=document.createElement("div");i.className="nav-item",i.id=e,i.onclick=function(){gotoView(t,this)},i.innerHTML='<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">'+o+'</svg><span class="nav-txt">'+n+"</span>",a.appendChild(i)}function D(){const e=document.getElementById("mobile-nav");e&&e.querySelectorAll("button").forEach(function(e){e.classList.toggle("active",e.getAttribute("data-view")===S.view)})}function C(){const e="quick-add-modal",t=document.getElementById(e);t&&t.remove();const n=document.createElement("div");n.className="modal-overlay",n.id=e,n.onclick=function(e){e.target===n&&n.remove()},n.innerHTML='<div class="modal"><div class="modal-title">Ajout rapide<button class="btn" onclick="document.getElementById(\''+e+'\').remove()">✕</button></div><div class="modal-row"><select class="modal-field" id="qa-kind"><option value="task">Tache</option><option value="event">Evenement</option></select><input class="modal-field" id="qa-date" type="date" value="'+todayStr()+'"/></div><input class="modal-field" id="qa-title" placeholder="Titre... (ex: JEE jeudi 14h)" /><div class="modal-row"><input class="modal-field" id="qa-start" type="time" value="08:30" /><input class="modal-field" id="qa-end" type="time" value="10:30" /></div><div class="detail-label" style="margin-bottom:6px">Couleur</div><div class="modal-row"><input class="modal-field" id="qa-color" type="color" value="#3b82f6" /></div><div class="modal-actions"><button class="btn" onclick="document.getElementById(\''+e+'\').remove()">Annuler</button><button class="btn btn-primary" onclick="quickAddSubmit()">Ajouter</button></div></div>',document.body.appendChild(n)}function j(e){const t=getMondayOf(e||0);return dateStr(t)}function M(e){return String(e||"")===j(0)}function A(e){const t=new Date(String(e)+"T00:00:00"),n=new Date(t);return n.setDate(t.getDate()+6),t.toLocaleDateString("fr-FR",{day:"2-digit",month:"short"})+" - "+n.toLocaleDateString("fr-FR",{day:"2-digit",month:"short"})}function B(){if(B._guard)return;S.goalWeeks=S.goalWeeks||{};const e=j(0),t=j(1);!S.goalWeeks[e]&&Array.isArray(S.weekGoals)&&S.weekGoals.length&&(S.goalWeeks[e]=S.weekGoals.map(function(t){return{text:t.text,done:!!t.done,weekKey:e,createdAt:Date.now()}})),!S.goalWeeks[t]&&Array.isArray(S.weekGoalsNext)&&S.weekGoalsNext.length&&(S.goalWeeks[t]=S.weekGoalsNext.map(function(e){return{text:e.text,done:!!e.done,weekKey:t,createdAt:Date.now()}})),S.goalSelectedWeek=S.goalSelectedWeek||e,function(){B._guard=!0;const e=new Date(todayStr()+"T00:00:00");Object.keys(S.goalWeeks||{}).forEach(function(t){const n=S.goalWeeks[t]||[],o=new Date(String(t)+"T00:00:00");Math.floor((e-o)/864e5)>90&&(S.goalWeeks[t]=n.filter(function(e){return!e.done})),S.goalWeeks[t].length||M(t)||delete S.goalWeeks[t]}),delete B._guard}()}function L(){B();const e=getMondayForDate(new Date),t=dateStr(e);return S.goalWeeks[t]||[]}function N(){const e=document.getElementById("detail-panel");e&&(e.classList.add("hidden"),S.myDayExpandedTaskId=null)}function W(e){const t=document.getElementById("detail-panel"),n=document.getElementById("detail-inner");if(!t||!n)return;const o=(S.tasks||[]).find(function(t){return t.id===e});if(!o)return void N();S.myDayExpandedTaskId=e,t.classList.remove("hidden");const a=o.plannedStart||"08:00",i=o.plannedEnd||"10:00",s=o.calendarTaskEventId?"Mettre a jour":"Planifier",r=o.done?"Remettre active":"Terminer",d=o.starred?"Retirer important":"Important";n.innerHTML='<div style="display:flex;align-items:center;margin-bottom:14px"><span style="font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Planification</span><button class="btn" style="margin-left:auto;padding:3px 8px" onclick="closeMyDayTaskPanel()">✕</button></div><div style="font-size:16px;font-weight:600;margin-bottom:10px">'+o.name+'</div><div class="detail-label">Horaire</div><div class="detail-label">Debut</div><input class="detail-field" type="time" value="'+a+'" onchange="setTaskScheduleFromMyDay(\''+o.id+'\',this.value,null)" /><div class="detail-label">Fin</div><input class="detail-field" type="time" value="'+i+'" onchange="setTaskScheduleFromMyDay(\''+o.id+'\',null,this.value)" /><div class="detail-label">Couleur</div><input class="detail-field" type="color" value="'+m(o.color||"ev-green")+'" onchange="setPlannedTaskColor(\''+o.id+'\',this.value)" /><div class="modal-actions" style="display:grid;grid-template-columns:1fr;gap:8px;justify-content:stretch"><button class="btn btn-primary" onclick="scheduleTaskFromMyDay(\''+o.id+"')\">"+s+'</button><button class="btn" onclick="toggleDone(\''+o.id+"')\">"+r+'</button><button class="btn" onclick="toggleStar(\''+o.id+"')\">"+d+'</button><button class="btn" onclick="openTaskDetailsFromMyDay(\''+o.id+'\')">Suivi</button><button class="btn btn-red" onclick="deleteTaskFromMyDay(\''+o.id+"')\">Supprimer</button></div>"}function q(){const e=document.getElementById("ev-color")?document.getElementById("ev-color").closest(".modal-row"):null;if(!e||document.getElementById("ev-type"))return;const t=document.createElement("div");t.className="modal-row",t.innerHTML='<select class="modal-field" id="ev-type" onchange="updateEventTypeFields(true)"><option value="course">Cours</option><option value="sport">Sport</option><option value="personal">Personnel</option><option value="project">Projet</option><option value="reminder">Rappel</option></select>',e.parentNode.insertBefore(t,e)}function V(e){return function(e){const t=b();if(!t.length)return 0;const n=f(e||y()[0]);for(let e=0;e<t.length;e++)if(n===t[e])return e;for(let e=0;e<t.length-1;e++)if(n<(t[e]+t[e+1])/2)return e;return t.length-1}(e.start||y()[0])}function F(e){const t=b();if(!t.length)return 1;const n=V(e),o=f(e.start||y()[0]),a=Math.max(o+30,f(e.end||e.start||y()[0]));let i=t.length;for(let e=n+1;e<t.length;e++)if(a<=t[e]){i=e;break}return Math.max(1,i-n)}window.openQuickAdd=C,window.quickAddSubmit=function(){const e=(document.getElementById("qa-kind")||{}).value||"task",t=((document.getElementById("qa-title")||{}).value||"").trim(),n=(document.getElementById("qa-date")||{}).value||todayStr();if(!t)return;const o=function(e,t){const n=String(e||"").trim(),o={title:n,date:t||todayStr(),hasTime:!1,start:"",end:""};if(!n)return o;const a=n.toLowerCase(),i=new Date((t||todayStr())+"T00:00:00");/\bdemain\b/.test(a)&&(i.setDate(i.getDate()+1),o.date=dateStr(i));const s={lundi:1,mardi:2,mercredi:3,jeudi:4,vendredi:5,samedi:6,dimanche:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6,sunday:0};Object.keys(s).forEach(function(e){if(!new RegExp("\\b"+e+"\\b","i").test(n))return;const i=new Date((t||todayStr())+"T00:00:00");let r=(s[e]-i.getDay()+7)%7;0!==r||/\baujourd/.test(a)||(r=7),i.setDate(i.getDate()+r),o.date=dateStr(i)});const r=n.match(/(\d{1,2})\s*[h:]\s*(\d{0,2})\s*(?:-|a|à|->|→)\s*(\d{1,2})\s*[h:]\s*(\d{0,2})/i);if(r){const e=Math.min(23,Number(r[1])||0),t=Math.min(59,Number(r[2]||"0")||0),n=Math.min(23,Number(r[3])||e+2),a=Math.min(59,Number(r[4]||"0")||0);o.start=w(e)+":"+w(t),o.end=w(n)+":"+w(a),o.hasTime=!0}else{const e=n.match(/\b(\d{1,2})\s*[h:]\s*(\d{0,2})\b/i);if(e){const t=Math.min(23,Number(e[1])||0),n=Math.min(59,Number(e[2]||"0")||0);o.start=w(t)+":"+w(n),o.end=(d=o.start,l=120,function(e){const t=Math.max(0,Math.min(1439,e)),n=t%60;return w(Math.floor(t/60))+":"+w(n)}(f(d)+l)),o.hasTime=!0}}var d,l;return o.title=n.replace(/\b(demain|aujourd\s*hui|today|tomorrow)\b/gi," ").replace(/\b(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi," ").replace(/\d{1,2}\s*[h:]\s*\d{0,2}\s*(?:-|a|à|->|→)?\s*\d{0,2}\s*[h:]?\s*\d{0,2}/gi," ").replace(/\s+/g," ").trim(),o.title||(o.title=n),o}(t,n),a=o.title;if("task"===e){const e=(document.getElementById("qa-start")||{}).value||"08:00",t=(document.getElementById("qa-end")||{}).value||"10:00",n=(document.getElementById("qa-color")||{}).value||"#3b82f6",i=o.hasTime?o.start:e,s=o.hasTime?o.end:t,r={id:"t"+Date.now(),name:a,matiere:"",priority:"Moyenne",status:"À faire",due:o.date,starred:"important"===S.view,myDay:o.date===todayStr(),done:!1,color:m(n),plannedStart:i,plannedEnd:s,subtasks:[],notes:""};S.tasks.unshift(r),"function"==typeof window.syncTaskIntoCalendar&&window.syncTaskIntoCalendar(r),k("Tache ajoutee")}else{const e=(document.getElementById("qa-start")||{}).value||"08:00",t=(document.getElementById("qa-end")||{}).value||"10:00",n=(document.getElementById("qa-color")||{}).value||"#3b82f6",i=o.hasTime?o.start:e,s=o.hasTime?o.end:t;S.calEvents.push({id:"ev"+Date.now(),title:a,date:o.date,start:i,end:s,location:"",prof:"",color:m(n),important:!1,notes:"",type:"course"}),k("Evenement ajoute")}const i=document.getElementById("quick-add-modal");i&&i.remove(),save(),renderView()},window.shiftGoalWeek=function(e){const t=new Date(S.goalSelectedWeek+"T00:00:00");t.setDate(t.getDate()+7*e),S.goalSelectedWeek=dateStr(t),save(),renderView()},window.addGoalForWeek=function(){if(B(),!M(S.goalSelectedWeek))return void k("Semaine passee en lecture seule.");const e=document.getElementById("goal-hub-inp"),t=((e||{}).value||"").trim();t&&(S.goalWeeks[S.goalSelectedWeek]=S.goalWeeks[S.goalSelectedWeek]||[],S.goalWeeks[S.goalSelectedWeek].push({text:t,done:!1,weekKey:S.goalSelectedWeek,createdAt:Date.now()}),e&&(e.value=""),save(),renderView())},window.toggleGoalForWeek=function(e){if(B(),!M(S.goalSelectedWeek))return void k("Semaine passee en lecture seule.");const t=S.goalWeeks[S.goalSelectedWeek]||[];t[e]&&(t[e].done=!t[e].done,save(),renderView())},window.delGoalForWeek=function(e){B(),M(S.goalSelectedWeek)?((S.goalWeeks[S.goalSelectedWeek]||[]).splice(e,1),save(),renderView()):k("Semaine passee en lecture seule.")},window.copyPendingGoals=function(e){B();const t=S.goalWeeks[S.goalSelectedWeek]||(S.goalWeeks[S.goalSelectedWeek]=[]),n=new Set(t.map(function(e){return String(e.text||"").trim().toLowerCase()}));(S.goalWeeks[e]||[]).filter(function(e){return!e.done}).forEach(function(e){const o=String(e.text||"").trim().toLowerCase();o&&!n.has(o)&&(t.push({text:e.text,done:!1,weekKey:S.goalSelectedWeek,createdAt:Date.now()}),n.add(o))}),save(),renderView()},window.addSubjectColor=function(){const e=(document.getElementById("subject-name")||{}).value||"",t=(document.getElementById("subject-color")||{}).value||"#3b82f6",n=e.trim();n&&(S.settings.subjectColors=S.settings.subjectColors||[],S.settings.subjectColors.push({name:n,color:p(t)}),save(),renderView())},window.updateSubjectColor=function(e,t){S.settings.subjectColors&&S.settings.subjectColors[e]&&(S.settings.subjectColors[e].color=p(t),save())},window.updateSubjectName=function(e,t){S.settings.subjectColors&&S.settings.subjectColors[e]&&(S.settings.subjectColors[e].name=String(t||"").trim(),save())},window.removeSubjectColor=function(e){S.settings.subjectColors&&(S.settings.subjectColors.splice(e,1),save(),renderView())},window.applySubjectColorsToExistingEvents=function(){let e=0;(S.calEvents||[]).forEach(function(t){const n=function(e){const t=String(e||"").toLowerCase(),n=S.settings&&Array.isArray(S.settings.subjectColors)?S.settings.subjectColors:[];for(let e=0;e<n.length;e++){const o=n[e];if(o&&o.name&&t.includes(String(o.name).toLowerCase()))return o.color||"ev-blue"}return""}(t.title);n&&t.color!==n&&(t.color=n,e++)}),save(),k(e?e+" evenement(s) recolores.":"Aucune modification."),renderView()},window.enableSystemNotifications=async function(){const e=await x();"granted"===e?k("Notifications systeme activees."):"unsupported"!==e&&k("Permission notifications: "+e)},window.sendTestNotification=function(){S.settings.notifications?(T("Academic Hub Pro","Rappel test: votre planification est active."),k("Rappel test envoye (si autorise).")):k("Activez d abord les rappels dans les reglages.")},window.updateSettingTheme=function(e){S.settings.themeMode=e,save(),h(),k("Theme mis a jour")},window.updateSettingAccent=function(e){S.settings.accent=e,save(),h(),k("Accent mis a jour")},window.toggleSettingNotifications=function(e){S.settings.notifications=!!e,S.settings.notifications&&x().then(function(){}),save()},window.toggleSettingSidebar=function(e){S.sidebarCollapsed=!!e,document.body.classList.toggle("sidebar-collapsed",S.sidebarCollapsed);const t=document.getElementById("sidebar-toggle");t&&(t.textContent=S.sidebarCollapsed?"»":"«"),save()},window.closeMyDayTaskPanel=N,window.openMyDayTaskPanel=function(e){W(e)},window.toggleTodayGoal=function(e){const t=L();t[e]&&(t[e].done=!t[e].done,save(),renderView())},window.scheduleTaskFromMyDay=function(e){const t=(S.tasks||[]).find(function(t){return t.id===e});if(!t)return;const n=todayStr();t.plannedStart=t.plannedStart||"14:00",t.plannedEnd=t.plannedEnd||"16:00",t.color=t.color||"ev-green",t.due=n,t.myDay=!0,"function"==typeof window.syncTaskIntoCalendar&&window.syncTaskIntoCalendar(t),save(),k("Tache planifiee dans le calendrier."),renderView()},window.openQuickAddTodayTask=function(){C(),setTimeout(function(){const e=document.getElementById("qa-kind"),t=document.getElementById("qa-date"),n=document.getElementById("qa-start"),o=document.getElementById("qa-end");e&&(e.value="task"),t&&(t.value=todayStr()),n&&(n.value="08:00"),o&&(o.value="10:00")},20)},window.setTaskScheduleFromMyDay=function(e,t,n){const o=(S.tasks||[]).find(function(t){return t.id===e});o&&(t&&(o.plannedStart=t),n&&(o.plannedEnd=n),o.due=todayStr(),o.myDay=!0,o.plannedStart||(o.plannedStart="08:00"),o.plannedEnd||(o.plannedEnd="10:00"),"function"==typeof window.syncTaskIntoCalendar&&window.syncTaskIntoCalendar(o),save(),renderView())},window.deleteTaskFromMyDay=function(e){if("function"==typeof window.delTask)return S.myDayExpandedTaskId===e&&(S.myDayExpandedTaskId=null),window.delTask(e),void k("Tache supprimee.");S.tasks=(S.tasks||[]).filter(function(t){return t.id!==e}),S.calEvents=(S.calEvents||[]).filter(function(t){return t.taskId!==e}),save(),renderView()},window.setPlannedTaskColor=function(e,t){const n=(S.tasks||[]).find(function(t){return t.id===e});n&&(n.color=p(t),"function"==typeof window.syncTaskIntoCalendar&&window.syncTaskIntoCalendar(n),save(),renderView())},window.removePlannedTaskFromMyDay=function(e){const t=(S.tasks||[]).find(function(t){return t.id===e});t&&(t.calendarTaskEventId&&(S.calEvents=(S.calEvents||[]).filter(function(e){return e.id!==t.calendarTaskEventId})),S.calEvents=(S.calEvents||[]).filter(function(t){return t.taskId!==e}),t.calendarTaskEventId="",t.plannedStart="",t.plannedEnd="",save(),k("Planification supprimee (tache conservee)."),renderView())},window.openTaskDetailsFromMyDay=function(e){S.myDayExpandedTaskId=null,S.selectedTask=e,S.view="all",renderView()},window.updateEventTypeFields=function(e){const t=(document.getElementById("ev-type")||{}).value||"course",n=document.getElementById("ev-location-row"),o=document.getElementById("ev-prof-row");if(!n||!o)return;const a="course"===t||"sport"===t||"project"===t,i="course"===t;n.style.display=a?"block":"none",o.style.display=i?"block":"none";const s=document.getElementById("ev-location"),r=document.getElementById("ev-prof");s&&(s.placeholder="sport"===t?"Lieu / Club":"project"===t?"Equipe / Salle":"Lieu (ex: Amphi 2)"),r&&(r.placeholder="Professeur");const d=document.getElementById("ev-color");d&&e&&(d.value=m(g(t)))},window.openNewEvent=function(e,t){window.__appleEditingEventId=null,i(e,t),q();const n=document.getElementById("ev-type");n&&(n.value="course"),updateEventTypeFields(!0)},window.editEvent=function(e){window.__appleEditingEventId=e,s(e),q();const t=(S.calEvents||[]).find(function(t){return t.id===e}),n=document.getElementById("ev-type");n&&(n.value=t&&t.type||"course"),updateEventTypeFields(!1)},window.saveEvent=function(){const e=document.getElementById("ev-type"),t=e?e.value:"course",n=window.__appleEditingEventId;if(r(),!S.calEvents.length)return;let o=null;n&&(o=S.calEvents.find(function(e){return e.id===n})),o||(o=S.calEvents[S.calEvents.length-1]),o&&(o.type=t,o.color=m(o.color||g(t))),window.__appleEditingEventId=null,save()},window.toggleDone=function(e){document.querySelectorAll('.task-item[onclick*="'+e+'"] .check-btn, .check-btn[onclick*="'+e+'"]').forEach(function(e){e.classList.remove("ahp-bounce"),e.offsetWidth,e.classList.add("ahp-bounce")});const t=(S.tasks||[]).find(function(t){return t.id===e});if(t){const e=!t.done;t.updatedAt=e?todayStr():""}c(e)},window.dragTaskStart=function(e,t){window.__dragTaskId=t,e.dataTransfer.setData("text/task-id",t),e.dataTransfer.effectAllowed="copy"},window.allowDrop=function(e){e.preventDefault(),e.currentTarget&&e.currentTarget.classList.add("drop-hover")},window.clearDropHover=function(e){e.currentTarget&&e.currentTarget.classList.remove("drop-hover")},window.dropTaskOnTask=function(e,t){e.preventDefault(),e.currentTarget&&e.currentTarget.classList.remove("drop-hover");const n=e.dataTransfer.getData("text/task-id")||window.__dragTaskId;if(!n||n===t)return;const o=(S.tasks||[]).findIndex(function(e){return e.id===n}),a=(S.tasks||[]).findIndex(function(e){return e.id===t});if(o<0||a<0)return;const i=S.tasks.splice(o,1)[0],s=o<a?a-1:a;S.tasks.splice(s,0,i),save(),k("Ordre des taches mis a jour."),renderView()},window.dropTaskOnDate=function(e,t){e.preventDefault(),e.currentTarget&&e.currentTarget.classList.remove("drop-hover");const n=e.dataTransfer.getData("text/task-id")||window.__dragTaskId;if(!n)return;const o=(S.tasks||[]).find(function(e){return e.id===n});o&&(o.due=t,o.myDay=t===todayStr(),save(),k("Date de tache mise a jour."),renderView())},window.dropTaskOnSlot=function(e,t,n){e.preventDefault(),clearDropHover(e);const o=e.dataTransfer.getData("text/task-id");if(!o)return;const a=S.tasks.find(function(e){return e.id===o});a&&(a.due=t,a.myDay=t===todayStr(),S.calEvents.push({id:"ev"+Date.now()+Math.random(),title:a.name,date:t,start:n,end:"",location:"",prof:"",color:a.color||"ev-green",important:a.starred,notes:a.notes||"",type:"project",source:"task-dnd"}),save(),k("Tache placee dans le calendrier"),renderView())},window.taskHTML=function(e){const t=l(e),n='<div draggable="true" ondragstart="dragTaskStart(event,\''+e.id+'\')" ondragover="allowDrop(event)" ondragleave="clearDropHover(event)" ondrop="dropTaskOnTask(event,\''+e.id+'\')" class="task-item';return t.replace('<div class="task-item',n)},window.renderWeekGrid=function(){const e=y(),t=weekDaysFrom(getCursorDate()),n=todayStr(),o="grid-template-columns:120px repeat("+e.length+", minmax(88px,1fr));";let a='<div class="smart-week">';a+='<div class="smart-head" style="'+o+'"><div></div>'+e.map(function(e){return"<div>"+("00:00"===(t=e)?"00:00+":t)+"</div>";var t}).join("")+"</div>",t.forEach(function(t){const i=dateStr(t),s=function(e){const t=[...e||[]].sort(function(e,t){return String(e.start||"").localeCompare(String(t.start||""))}),n=[];return t.forEach(function(e){if(!n.length)return void n.push(Object.assign({},e));const t=n[n.length-1],o=String(t.title||"")===String(e.title||"")&&String(t.color||"")===String(e.color||"")&&String(t.location||"")===String(e.location||"")&&String(t.prof||"")===String(e.prof||"")&&String(t.type||"")===String(e.type||""),a=String(t.end||"")&&String(e.start||"")&&f(t.end)===f(e.start);o&&a?t.end=e.end||t.end:n.push(Object.assign({},e))}),n}((S.calEvents||[]).filter(function(e){return e.date===i})),r={};s.forEach(function(e){const t=V(e);r[t]=r[t]||[],r[t].push(e)}),a+='<div class="smart-row" style="'+o+'">',a+="<div class=\"smart-day\" onclick=\"S.calView='day';S.calDay='"+i+"';S.calCursor='"+i+"';save();renderView()\" ondrop=\"dropTaskOnDate(event,'"+i+'\')" ondragover="allowDrop(event)" ondragleave="clearDropHover(event)">'+DAYS_FR[t.getDay()]+" "+String(t.getDate()).padStart(2,"0")+(i===n?" • Aujourd'hui":"")+"</div>";for(let t=0;t<e.length;t++){const n=e[t],o=r[t]||[];if(o.length){const s=o[0],r=Math.min(e.length-t,F(s));a+='<div class="smart-cell" style="grid-column: span '+r+';" onclick="openNewEvent(\''+i+"','"+n+"')\" ondrop=\"dropTaskOnSlot(event,'"+i+"','"+n+'\')" ondragover="allowDrop(event)" ondragleave="clearDropHover(event)"><div class="smart-events-stack">'+o.map(function(e){return'<div class="smart-event" style="'+v(e.color,"ev-blue")+'" onclick="event.stopPropagation();editEvent(\''+e.id+"')\">"+e.title+"<small>"+(e.start||"")+(e.end?" - "+e.end:"")+"</small></div>"}).join("")+"</div></div>",t+=r-1}else a+='<div class="smart-cell" onclick="openNewEvent(\''+i+"','"+n+"')\" ondrop=\"dropTaskOnSlot(event,'"+i+"','"+n+'\')" ondragover="allowDrop(event)" ondragleave="clearDropHover(event)"></div>'}a+="</div>"}),a+="</div>",document.getElementById("content").innerHTML=a},window.renderDayView=function(){a();const e=y();document.querySelectorAll(".day-slot").forEach(function(t,n){const o=S.calDay||S.calCursor||todayStr(),a=e[n]||(window.HOURS&&window.HOURS[n]?window.HOURS[n]:e[0]||"08:30");t.setAttribute("ondrop","dropTaskOnSlot(event,'"+o+"','"+a+"')"),t.setAttribute("ondragover","allowDrop(event)"),t.setAttribute("ondragleave","clearDropHover(event)")})},window.renderMonthView=function(){o(),document.querySelectorAll(".month-cell").forEach(function(e){const t=(e.getAttribute("onclick")||"").match(/openNewEvent\('([^']+)'/);if(!t)return;const n=t[1];e.setAttribute("onclick","openDayDetails('"+n+"')"),e.setAttribute("ondrop","dropTaskOnDate(event,'"+n+"')"),e.setAttribute("ondragover","allowDrop(event)"),e.setAttribute("ondragleave","clearDropHover(event)")})},window.openDayDetails=function(e){const t=document.getElementById("day-detail-modal");t&&t.remove();const n=(S.calEvents||[]).filter(function(t){return t.date===e}),o=(S.tasks||[]).filter(function(t){return t.due===e&&!t.done}),a=document.createElement("div");a.id="day-detail-modal",a.className="modal-overlay",a.onclick=function(e){e.target===a&&a.remove()},a.innerHTML='<div class="modal"><div class="modal-title">Details du '+e+'<button class="btn" onclick="document.getElementById(\'day-detail-modal\').remove()">✕</button></div><div style="margin-bottom:10px">'+(n.length?n.map(function(e){return'<div class="agenda-item badge" style="display:block;margin-bottom:6px;'+v(e.color,"ev-blue")+'">🗓 '+(e.start||"")+" "+e.title+"</div>"}).join(""):'<div class="agenda-empty">Aucun evenement</div>')+'</div><div style="margin-bottom:12px">'+(o.length?o.map(function(e){return'<div class="agenda-item task" style="display:block;margin-bottom:6px">📌 '+e.name+"</div>"}).join(""):'<div class="agenda-empty">Aucune tache due</div>')+'</div><div class="modal-actions" style="justify-content:space-between"><button class="btn" onclick="document.getElementById(\'day-detail-modal\').remove();openNewEvent(\''+e+"','08:30')\">+ Evenement</button><button class=\"btn btn-primary\" onclick=\"document.getElementById('day-detail-modal').remove();openQuickAdd();setTimeout(function(){var d=document.getElementById('qa-date');if(d)d.value='"+e+"';},40)\">+ Tache</button></div></div>",document.body.appendChild(a)},window.viewTitleMap=function(){const e=d();return e.goals="Objectifs hebdo",e.import="Import ENSAM",e.analytics="Analytics",e.settings="Reglages",e.search="Recherche",e},window.renderView=function(){h(),syncNavActive(),updateCounts();const e=new Date,t=document.getElementById("view-date");return t&&(t.textContent=e.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})),"today"===S.view?(D(),function(){const e=todayStr(),t=(S.calEvents||[]).filter(function(t){return t.date===e}).sort(function(e,t){return String(e.start||"").localeCompare(String(t.start||""))}),n=function(e){const t={};return(S.tasks||[]).forEach(function(n){n.done||(n.due===e||n.myDay)&&(t[n.id]=n)}),Object.keys(t).map(function(e){return t[e]})}(e),o=L(),a=o.filter(function(e){return e.done}).length,i=(S.tasks||[]).filter(function(t){return!t.done&&t.due&&t.due<e}).length;document.getElementById("view-title").textContent="My Day",document.getElementById("topbar-right").innerHTML='<button class="btn" onclick="openNewEvent(\''+e+"','08:30')\">+ Evenement</button>";let s='<div class="import-card" style="margin-bottom:14px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div style="font-size:12px;color:var(--text-3)">Vue intelligente du jour</div><div style="font-size:20px;font-weight:600;text-transform:capitalize">'+new Date(e+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})+'</div></div><span class="score-pill">Focus '+Math.max(10,Math.min(100,100-10*i))+'/100</span></div></div><div class="stats-row" style="margin-bottom:12px"><div class="stat-card blue"><div class="stat-val">'+t.length+'</div><div class="stat-lbl">Evenements du jour</div></div><div class="stat-card green"><div class="stat-val">'+n.length+'</div><div class="stat-lbl">Taches actives</div></div><div class="stat-card amber"><div class="stat-val">'+a+"/"+o.length+'</div><div class="stat-lbl">Objectifs semaine</div></div><div class="stat-card red"><div class="stat-val">'+i+'</div><div class="stat-lbl">En retard</div></div></div><div class="analytics-grid" style="grid-template-columns:1.2fr 1fr">';s+='<div class="import-card"><h3 style="margin-bottom:8px">Timeline du jour</h3>'+(t.length?t.map(function(e){return'<div class="agenda-item badge" style="display:block;margin-bottom:8px;'+v(e.color,"ev-blue")+'"><strong>'+(e.start||"--:--")+(e.end?" - "+e.end:"")+"</strong> • "+e.title+(e.location?'<div style="font-size:11px;opacity:.8">'+e.location+"</div>":"")+"</div>"}).join(""):'<div class="empty-state" style="padding:12px">Aucun evenement aujourd\'hui.</div>')+"</div>",s+='<div class="import-card"><h3 style="margin-bottom:8px">Objectifs de la semaine</h3>'+(o.length?o.map(function(e,t){return'<div class="wg-item '+(e.done?"wg-done":"")+'"><div class="check-btn '+(e.done?"checked":"")+'" onclick="toggleTodayGoal('+t+')"></div><span>'+e.text+"</span></div>"}).join(""):'<div class="empty-state" style="padding:12px">Aucun objectif pour cette semaine.</div>')+'<div style="margin-top:10px"><button class="btn" onclick="gotoView(\'goals\',document.getElementById(\'nav-goals\'))">Gerer les objectifs</button></div></div>',s+="</div>",s+='<div class="import-card" style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px"><h3>Taches du jour (suivi)</h3><div style="display:flex;align-items:center;gap:8px"><span class="score-pill">'+n.length+'</span><button class="btn" onclick="openQuickAddTodayTask()">+ Nouvelle tache</button></div></div>'+(n.length?n.map(function(e){return'<div class="sub-item" style="padding:10px 12px;margin-bottom:6px;gap:10px"><span style="font-weight:600;min-width:96px">'+(e.plannedStart||"08:00")+" - "+(e.plannedEnd||"10:00")+'</span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+e.name+'</span><button class="btn" style="padding:4px 10px" onclick="openMyDayTaskPanel(\''+e.id+"')\">Etendre</button></div>"}).join(""):'<div class="empty-state" style="padding:12px">Aucune tache active pour aujourd\'hui.</div>')+"</div>",document.getElementById("content").innerHTML=s,S.myDayExpandedTaskId?W(S.myDayExpandedTaskId):N()}()):(N(),"goals"===S.view?(D(),function(){B();const e=S.goalSelectedWeek,t=S.goalWeeks[e]||(S.goalWeeks[e]=[]),n=M(e),o=Object.keys(S.goalWeeks).sort().reverse(),a='<div class="import-card"><div class="goal-week-title"><span>Objectifs de la semaine '+A(e)+'</span><div class="goal-week-actions"><button class="btn" onclick="shiftGoalWeek(-1)">Semaine -</button> <button class="btn" onclick="shiftGoalWeek(1)">Semaine +</button></div></div>'+(n?"":'<div class="score-pill" style="margin:8px 0 12px 0">Lecture seule (historique)</div>')+"<div>"+(t.length?t.map(function(e,t){return'<div class="wg-item '+(e.done?"wg-done":"")+'"><div class="check-btn '+(e.done?"checked":"")+'" '+(n?'onclick="toggleGoalForWeek('+t+')"':"")+"></div><span>"+e.text+"</span>"+(n?'<button class="wg-del" onclick="delGoalForWeek('+t+')">✕</button>':"")+"</div>"}).join(""):'<div class="empty-state" style="padding:18px">Aucun objectif pour cette semaine</div>')+"</div>"+(n?'<div class="week-add-row"><input id="goal-hub-inp" placeholder="Nouvel objectif..." onkeydown="if(event.key===\'Enter\')addGoalForWeek()"/><button class="btn btn-primary" onclick="addGoalForWeek()">+</button></div>':"")+'</div><div class="import-card"><div class="goal-week-title"><span>Historique</span><span class="score-pill">'+o.length+" semaines</span></div>"+o.map(function(e){const t=S.goalWeeks[e]||[],n=t.filter(function(e){return!e.done});return'<details class="goals-history-item"><summary>'+A(e)+" - "+t.length+" objectifs"+(n.length?" • "+n.length+" en attente":"")+'</summary><div style="margin-top:10px">'+t.map(function(e){return'<div style="font-size:13px;color:#6E6E73;margin-bottom:4px">'+(e.done?"✅ ":"🟡 ")+e.text+"</div>"}).join("")+(n.length?'<button class="btn" style="margin-top:8px" onclick="copyPendingGoals(\''+e+"')\">Copier les non termines</button>":"")+"</div></details>"}).join("")+"</div>";document.getElementById("view-title").textContent="Objectifs hebdo",document.getElementById("topbar-right").innerHTML="",document.getElementById("content").innerHTML=a}()):"import"===S.view?(D(),document.getElementById("view-title").textContent="Import ENSAM",document.getElementById("topbar-right").innerHTML='<button class="btn btn-primary" onclick="openEnsamImport()">Importer un emploi du temps</button>',void(document.getElementById("content").innerHTML='<div class="import-card"><h3 style="margin-bottom:8px">Importer via PDF, image ou texte</h3><p style="font-size:14px;color:#6E6E73;margin-bottom:12px">Utilisez le module ENSAM pour extraire automatiquement les cours et les convertir en evenements calendrier.</p><button class="btn btn-primary" onclick="openEnsamImport()">Ouvrir le module d\'import</button></div><div class="import-card"><h3 style="margin-bottom:8px">Conseils qualite</h3><ul style="padding-left:18px;color:#6E6E73"><li>Preferer un PDF texte non scanne.</li><li>Verifier le lundi de debut avant import.</li><li>Toutes les seances importees sont harmonisees en bleu ENSAM.</li></ul></div>')):"analytics"===S.view?(D(),function(){const e=S.tasks||[],t=S.calEvents||[],n=e.filter(function(e){return!!e.done}).length,o=e.length?Math.round(n/e.length*100):0,a={},i={};e.forEach(function(e){const t=e.matiere||"General";a[t]=(a[t]||0)+1}),t.forEach(function(e){const t=e.title||"General",n=f(e.start||"08:00"),o=Math.max(n,f(e.end||e.start||"08:00")),a=Math.max(30,o-n);i[t]=(i[t]||0)+a});const s=[];for(let t=6;t>=0;t--){const n=new Date;n.setDate(n.getDate()-t);const o=dateStr(n),a=n.toLocaleDateString("fr-FR",{weekday:"short"}).replace(".",""),i=e.filter(function(e){return e.done&&e.updatedAt&&String(e.updatedAt).slice(0,10)===o}).length;s.push({label:a,value:i})}s.some(function(e){return e.value>0})||(s[6].value=e.filter(function(e){return e.done}).length);const r=Math.max(1,Math.max.apply(null,s.map(function(e){return e.value}))),d=Object.keys(i).sort(function(e,t){return i[t]-i[e]}).slice(0,5),l=Math.min(100,Math.round(.6*o+2*Math.min(t.length,20)));document.getElementById("view-title").textContent="Analytics",document.getElementById("topbar-right").innerHTML='<span class="score-pill">Score '+l+"/100</span>",document.getElementById("content").innerHTML='<div class="analytics-grid"><div class="analytics-card"><div style="font-size:12px;color:#8E8E93">Taux de completion</div><div style="font-size:30px;font-weight:700">'+o+'%</div></div><div class="analytics-card"><div style="font-size:12px;color:#8E8E93">Taches terminees</div><div style="font-size:30px;font-weight:700">'+n+'</div></div><div class="analytics-card"><div style="font-size:12px;color:#8E8E93">Evenements planifies</div><div style="font-size:30px;font-weight:700">'+t.length+'</div></div><div class="analytics-card"><div style="font-size:12px;color:#8E8E93">Taches en retard</div><div style="font-size:30px;font-weight:700">'+e.filter(function(e){return!e.done&&e.due&&e.due<todayStr()}).length+'</div></div></div><div class="analytics-card"><h3 style="margin-bottom:8px">Charge par matiere</h3>'+Object.keys(a).sort(function(e,t){return a[t]-a[e]}).map(function(e){return'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>'+e+"</span><strong>"+a[e]+"</strong></div>"}).join("")+'</div><div class="analytics-card"><h3 style="margin-bottom:8px">Tendance 7 jours</h3>'+s.map(function(e){const t=Math.round(e.value/r*100);return'<div class="chart-row"><span style="font-size:12px;color:#6E6E73">'+e.label+'</span><div class="chart-track"><div class="chart-fill" style="width:'+t+'%"></div></div><strong style="font-size:12px">'+e.value+"</strong></div>"}).join("")+'</div><div class="analytics-card"><h3 style="margin-bottom:8px">Temps par matiere (estime)</h3>'+(d.length?d.map(function(e){return'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>'+e+"</span><strong>"+(i[e]/60).toFixed(1)+"h</strong></div>"}).join(""):'<div style="font-size:13px;color:#6E6E73">Ajoutez des evenements avec horaire pour calculer le temps.</div>')+'</div><div class="analytics-card"><h3 style="margin-bottom:8px">Badges</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="score-pill">'+(o>=70?"🏆 Focus Master":"🎯 Keep Going")+'</span><span class="score-pill">'+(t.length>=8?"📅 Planner Pro":"🗓️ Calendar Starter")+'</span><span class="score-pill">'+(e.length>=10?"📚 Heavy Learner":"📝 Building Habits")+"</span></div></div>"}()):"settings"===S.view?(D(),function(){u(),document.getElementById("view-title").textContent="Reglages",document.getElementById("topbar-right").innerHTML="",document.getElementById("content").innerHTML='<div class="settings-grid"><div class="settings-card"><h3 style="margin-bottom:10px">Apparence</h3><label style="display:block;font-size:13px;margin-bottom:6px">Theme</label><select class="detail-field" id="set-theme" onchange="updateSettingTheme(this.value)"><option value="system" '+("system"===S.settings.themeMode?"selected":"")+'>Systeme</option><option value="light" '+("light"===S.settings.themeMode?"selected":"")+'>Clair</option><option value="dark" '+("dark"===S.settings.themeMode?"selected":"")+'>Sombre</option></select><label style="display:block;font-size:13px;margin-bottom:6px">Couleur accent</label><input class="detail-field" type="color" id="set-accent" value="'+(S.settings.accent||"#007AFF")+'" onchange="updateSettingAccent(this.value)" /></div><div class="settings-card"><h3 style="margin-bottom:10px">Productivite</h3><label style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><input type="checkbox" '+(S.settings.notifications?"checked":"")+' onchange="toggleSettingNotifications(this.checked)"/> Activer les rappels</label><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" '+(S.sidebarCollapsed?"checked":"")+' onchange="toggleSettingSidebar(this.checked)"/> Sidebar compacte</label><div style="margin-top:10px"><button class="btn" onclick="enableSystemNotifications()">Autoriser notifications systeme</button></div><div style="margin-top:10px"><button class="btn" onclick="sendTestNotification()">Envoyer un rappel test</button></div></div></div>';const e=(S.settings.subjectColors||[]).map(function(e,t){return'<div class="subject-row"><input type="color" value="'+m(e.color||"ev-blue")+'" onchange="updateSubjectColor('+t+', this.value)" /><input type="text" value="'+String(e.name||"").replace(/"/g,"&quot;")+'" placeholder="Matiere" onchange="updateSubjectName('+t+', this.value)" /><button class="btn" onclick="removeSubjectColor('+t+')">Suppr.</button></div>'}).join("");document.getElementById("content").innerHTML+='<div class="settings-card" style="margin-top:12px"><h3 style="margin-bottom:10px">Matieres & codes couleur</h3><p style="font-size:13px;color:#6E6E73;margin-bottom:10px">Les evenements prennent automatiquement la couleur de leur matiere si le titre correspond.</p><div>'+e+'</div><div class="subject-add-row"><input id="subject-name" type="text" placeholder="Nouvelle matiere..." /><input id="subject-color" type="color" value="#3b82f6" /><button class="btn btn-primary" onclick="addSubjectColor()">Ajouter</button></div><div style="margin-top:10px"><button class="btn" onclick="applySubjectColorsToExistingEvents()">Appliquer aux evenements existants</button></div></div>'}()):"search"===S.view?(D(),function(){const e=(S.searchQ||"").trim().toLowerCase();if(document.getElementById("view-title").textContent="Recherche",document.getElementById("topbar-right").innerHTML='<span class="score-pill">'+(e?'"'+S.searchQ+'"':"Aucun filtre")+"</span>",!e)return void(document.getElementById("content").innerHTML='<div class="empty-state">Tapez une recherche globale puis validez avec Entree.</div>');B();const t=S.tasks.filter(function(t){return[t.name,t.matiere,t.notes].join(" ").toLowerCase().includes(e)}).map(function(e){return{kind:"Tache",title:e.name,sub:(e.due||"Sans date")+(e.matiere?" • "+e.matiere:"")}}),n=S.calEvents.filter(function(t){return[t.title,t.location,t.prof,t.notes].join(" ").toLowerCase().includes(e)}).map(function(e){return{kind:"Evenement",title:e.title,sub:(e.date||"")+" "+(e.start||"")+(e.location?" • "+e.location:"")}}),o=S.ideas.filter(function(t){return String(t.text||"").toLowerCase().includes(e)}).map(function(e){return{kind:"Idee",title:e.text.slice(0,70),sub:new Date(e.ts).toLocaleDateString("fr-FR")}}),a=[];Object.keys(S.goalWeeks).forEach(function(t){(S.goalWeeks[t]||[]).forEach(function(n){String(n.text||"").toLowerCase().includes(e)&&a.push({kind:"Objectif",title:n.text,sub:A(t)+(n.done?" • termine":" • en cours")})})});const i=t.concat(n,o,a);document.getElementById("content").innerHTML=i.length?'<div class="search-grid">'+i.map(function(e){return'<div class="search-result-card"><div style="font-size:12px;color:#8E8E93">'+e.kind+'</div><div style="font-weight:600;margin:4px 0">'+e.title+'</div><div style="font-size:12px;color:#6E6E73">'+e.sub+"</div></div>"}).join("")+"</div>":'<div class="empty-state">Aucun resultat pour "'+S.searchQ+'".</div>'}()):(n(),void D()))},u(),B(),function(){const e=document.querySelector(".app-title");if(!e||document.getElementById("sidebar-toggle"))return;const t=e.querySelector("svg"),n=document.createElement("span");n.textContent=e.textContent.trim(),e.textContent="",t&&e.appendChild(t),e.appendChild(n);const o=document.createElement("button");o.id="sidebar-toggle",o.className="sidebar-toggle",o.title="Reduire la barre",o.textContent=S.sidebarCollapsed?"»":"«",o.onclick=function(){S.sidebarCollapsed=!S.sidebarCollapsed,document.body.classList.toggle("sidebar-collapsed",S.sidebarCollapsed),o.textContent=S.sidebarCollapsed?"»":"«",save()},e.appendChild(o),document.body.classList.toggle("sidebar-collapsed",S.sidebarCollapsed)}(),document.querySelectorAll(".nav-item").forEach(e=>{if(e.querySelector(".nav-txt"))return;const t=e.childNodes[e.childNodes.length-2],n=(t&&t.textContent?t.textContent:"").trim();if(!n)return;const o=document.createElement("span");o.className="nav-txt",o.textContent=n,t.textContent="",e.insertBefore(o,e.querySelector(".cnt")||null)}),I("nav-goals","goals","Weekly Goals",'<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/><path stroke-linecap="round" d="M5 5h14M5 19h10"/>'),I("nav-import","import","ENSAM Import",'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path stroke-linecap="round" d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>'),I("nav-analytics","analytics","Analytics",'<path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16M7 16V8m5 8V5m5 11v-6"/>'),I("nav-settings","settings","Settings",'<path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066 1.724 1.724 0 012.36 2.36 1.724 1.724 0 001.066 2.573 1.724 1.724 0 010 3.35 1.724 1.724 0 00-1.066 2.573 1.724 1.724 0 01-2.36 2.36 1.724 1.724 0 00-2.573 1.066 1.724 1.724 0 01-3.35 0 1.724 1.724 0 00-2.573-1.066 1.724 1.724 0 01-2.36-2.36 1.724 1.724 0 00-1.066-2.573 1.724 1.724 0 010-3.35 1.724 1.724 0 001.066-2.573 1.724 1.724 0 012.36-2.36 1.724 1.724 0 002.573-1.066z"/><circle cx="12" cy="12" r="3"/>'),window.VIEW_NAV_ID&&(window.VIEW_NAV_ID.goals="nav-goals",window.VIEW_NAV_ID.import="nav-import",window.VIEW_NAV_ID.analytics="nav-analytics",window.VIEW_NAV_ID.settings="nav-settings",window.VIEW_NAV_ID.search="nav-all"),function(){const e=document.querySelector(".topbar"),t=document.getElementById("topbar-right");if(!e||!t||document.getElementById("topbar-global"))return;const n=document.createElement("div");n.id="topbar-global",n.className="topbar-global",n.innerHTML='<button class="btn" id="btn-theme" title="Theme">🌓</button><button class="btn" id="btn-quick" title="Ajout rapide">+ Rapide</button>',e.insertBefore(n,t),document.getElementById("btn-theme").onclick=function(){const e=S.settings.themeMode;S.settings.themeMode="system"===e?"light":"light"===e?"dark":"system",save(),h(),k("Theme: "+S.settings.themeMode)},document.getElementById("btn-quick").onclick=function(){C()}}(),function(){if(document.getElementById("mobile-nav"))return;const e=document.createElement("div");e.id="mobile-nav",e.className="mobile-nav",e.innerHTML=t.map(function(e){return'<button data-view="'+e.key+'">'+e.label+"</button>"}).join(""),document.body.appendChild(e),e.addEventListener("click",function(e){const t=e.target.closest("button[data-view]");var n;t&&(n=t.getAttribute("data-view"),S.view=n,save(),renderView())})}(),function(){if(document.getElementById("fab-quick-add"))return;const e=document.createElement("button");e.id="fab-quick-add",e.className="fab-quick-add",e.title="Ajout rapide",e.textContent="+",e.onclick=C,document.body.appendChild(e)}(),q(),document.addEventListener("keydown",function(e){const t=String(e.target&&e.target.tagName||"").toLowerCase(),n="input"===t||"textarea"===t||e.target&&e.target.isContentEditable;return(e.ctrlKey||e.metaKey)&&"k"===String(e.key).toLowerCase()?(e.preventDefault(),void C()):n||"n"!==String(e.key).toLowerCase()?void(n||"/"!==String(e.key)||(e.preventDefault(),C())):(e.preventDefault(),void C())}),h(),function(){if(!S.settings.notifications||sessionStorage.getItem("ahp-notified"))return;const e=(S.tasks||[]).filter(function(e){return!e.done&&e.due&&e.due<todayStr()}).length,t=(S.tasks||[]).filter(function(e){return!e.done&&e.due===todayStr()}).length;e>0&&(k("Vous avez "+e+" tache(s) en retard."),T("Academic Hub Pro","Vous avez "+e+" tache(s) en retard.")),t>0&&T("Academic Hub Pro",t+" tache(s) prevues aujourd hui."),sessionStorage.setItem("ahp-notified","1")}(),renderView()}();
+(function () {
+  if (typeof window.S === 'undefined') return;
+
+  const DEFAULT_WEEK_RENDER_SLOTS = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00', '00:00'];
+  const MOBILE_VIEWS = [
+    { key: 'today', label: 'Jour' },
+    { key: 'calendar', label: 'Calendrier' },
+    { key: 'goals', label: 'Objectifs' },
+    { key: 'ideas', label: 'Idees' },
+    { key: 'settings', label: 'Reglages' },
+  ];
+
+  const legacyRenderView = window.renderView;
+  const legacyRenderMonthView = window.renderMonthView;
+  const legacyRenderDayView = window.renderDayView;
+  const legacyOpenNewEvent = window.openNewEvent;
+  const legacyEditEvent = window.editEvent;
+  const legacySaveEvent = window.saveEvent;
+  const legacyViewTitleMap = window.viewTitleMap;
+  const legacyTaskHTML = window.taskHTML;
+  const legacyToggleDone = window.toggleDone;
+
+  function ensureSettingsDefaults() {
+    S.settings = S.settings || {};
+    if (!S.settings.themeMode) S.settings.themeMode = 'system';
+    if (!S.settings.accent) S.settings.accent = '#007AFF';
+    if (typeof S.settings.notifications !== 'boolean') S.settings.notifications = true;
+    if (!Array.isArray(S.settings.subjectColors)) {
+      S.settings.subjectColors = window.SUBJECT_COLORS ? Object.keys(window.SUBJECT_COLORS).map(function (k) {
+        return { name: k, color: window.SUBJECT_COLORS[k] };
+      }) : [
+        { name: 'WAF', color: 'ev-blue' },
+        { name: 'Securite', color: 'ev-purple' },
+        { name: 'Francais', color: 'ev-green' },
+        { name: 'Anglais', color: 'ev-amber' },
+        { name: 'Management', color: 'ev-red' },
+      ];
+    }
+    if (typeof S.sidebarCollapsed !== 'boolean') S.sidebarCollapsed = false;
+  }
+
+  function eventColorToHex(v) {
+    const map = {
+      'ev-blue': '#3b82f6',
+      'ev-green': '#10b981',
+      'ev-purple': '#8b5cf6',
+      'ev-amber': '#f59e0b',
+      'ev-red': '#ef4444',
+      'ev-pink': '#ec4899',
+    };
+    const raw = String(v || '').trim();
+    if (/^#[0-9a-fA-F]{3}$/.test(raw)) {
+      return ('#' + raw[1] + raw[1] + raw[2] + raw[2] + raw[3] + raw[3]).toLowerCase();
+    }
+    if (/^#[0-9a-fA-F]{6}$/.test(raw)) return raw.toLowerCase();
+    return map[v] || '#3b82f6';
+  }
+
+  function hexToEventColor(hex) {
+    return eventColorToHex(hex);
+  }
+
+  function colorText(hex) {
+    const c = eventColorToHex(hex);
+    const r = parseInt(c.slice(1, 3), 16);
+    const g = parseInt(c.slice(3, 5), 16);
+    const b = parseInt(c.slice(5, 7), 16);
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return lum > 0.63 ? '#111827' : '#ffffff';
+  }
+
+  function colorStyleInline(v, fallback) {
+    const hex = eventColorToHex(v || fallback || '#3b82f6');
+    return 'background:' + hex + ';color:' + colorText(hex) + ';';
+  }
+
+  function typeDefaultColor(type) {
+    const t = String(type || '').toLowerCase();
+    if (t === 'course') return '#3b82f6';
+    if (t === 'sport') return '#10b981';
+    if (t === 'personal') return '#ffffff';
+    if (t === 'project') return '#ef4444';
+    if (t === 'reminder') return '#f59e0b';
+    return '#3b82f6';
+  }
+
+  function inferSubjectColor(title) {
+    const txt = String(title || '').toLowerCase();
+    const rows = S.settings && Array.isArray(S.settings.subjectColors) ? S.settings.subjectColors : [];
+    for (let i = 0; i < rows.length; i++) {
+      const s = rows[i];
+      if (s && s.name && txt.includes(String(s.name).toLowerCase())) {
+        return s.color || 'ev-blue';
+      }
+    }
+    return '';
+  }
+
+  function minutes(v) {
+    if (!v || !String(v).includes(':')) return 0;
+    const parts = String(v).split(':').map(Number);
+    return ((parts[0] || 0) * 60) + (parts[1] || 0);
+  }
+
+  function getWeekRenderSlots() {
+    const globalHours = (typeof HOURS !== 'undefined' && Array.isArray(HOURS)) ? HOURS : window.HOURS;
+    if (Array.isArray(globalHours) && globalHours.length) {
+      return globalHours.filter(function (slot) {
+        return /^\d{2}:\d{2}$/.test(String(slot || ''));
+      });
+    }
+    if (Array.isArray(window.ENSAM_SLOTS) && window.ENSAM_SLOTS.length) {
+      return window.ENSAM_SLOTS.map(function (slot) { return slot.start; });
+    }
+    return DEFAULT_WEEK_RENDER_SLOTS;
+  }
+
+  function slotLabel(v) {
+    return v === '00:00' ? '00:00+' : v;
+  }
+
+  function getWeekSlotMinutes() {
+    return getWeekRenderSlots().map(function (t) { return minutes(t); });
+  }
+
+  function getSlotIndexFromTime(timeValue) {
+    const slots = getWeekSlotMinutes();
+    if (!slots.length) return 0;
+    const t = minutes(timeValue || getWeekRenderSlots()[0]);
+    for (let i = 0; i < slots.length; i++) {
+      if (t === slots[i]) return i;
+    }
+    for (let i = 0; i < slots.length - 1; i++) {
+      const mid = (slots[i] + slots[i + 1]) / 2;
+      if (t < mid) return i;
+    }
+    return slots.length - 1;
+  }
+
+  function pad2(v) {
+    return String(v).padStart(2, '0');
+  }
+
+  function toTimeString(totalMin) {
+    const m = Math.max(0, Math.min(23 * 60 + 59, totalMin));
+    const hh = Math.floor(m / 60);
+    const mm = m % 60;
+    return pad2(hh) + ':' + pad2(mm);
+  }
+
+  function addMinutes(time, delta) {
+    return toTimeString(minutes(time) + delta);
+  }
+
+  function parseQuickIntent(rawText, baseDate) {
+    const src = String(rawText || '').trim();
+    const parsed = {
+      title: src,
+      date: baseDate || todayStr(),
+      hasTime: false,
+      start: '',
+      end: '',
+    };
+    if (!src) return parsed;
+
+    const low = src.toLowerCase();
+    const now = new Date((baseDate || todayStr()) + 'T00:00:00');
+
+    if (/\bdemain\b/.test(low)) {
+      now.setDate(now.getDate() + 1);
+      parsed.date = dateStr(now);
+    }
+
+    const dayMap = {
+      lundi: 1, mardi: 2, mercredi: 3, jeudi: 4, vendredi: 5, samedi: 6, dimanche: 0,
+      monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6, sunday: 0,
+    };
+    Object.keys(dayMap).forEach(function (k) {
+      if (!new RegExp('\\b' + k + '\\b', 'i').test(src)) return;
+      const cur = new Date((baseDate || todayStr()) + 'T00:00:00');
+      const wanted = dayMap[k];
+      let diff = (wanted - cur.getDay() + 7) % 7;
+      if (diff === 0 && !/\baujourd/.test(low)) diff = 7;
+      cur.setDate(cur.getDate() + diff);
+      parsed.date = dateStr(cur);
+    });
+
+    const range = src.match(/(\d{1,2})\s*[h:]\s*(\d{0,2})\s*(?:-|a|à|->|→)\s*(\d{1,2})\s*[h:]\s*(\d{0,2})/i);
+    if (range) {
+      const sh = Math.min(23, Number(range[1]) || 0);
+      const sm = Math.min(59, Number(range[2] || '0') || 0);
+      const eh = Math.min(23, Number(range[3]) || sh + 2);
+      const em = Math.min(59, Number(range[4] || '0') || 0);
+      parsed.start = pad2(sh) + ':' + pad2(sm);
+      parsed.end = pad2(eh) + ':' + pad2(em);
+      parsed.hasTime = true;
+    } else {
+      const solo = src.match(/\b(\d{1,2})\s*[h:]\s*(\d{0,2})\b/i);
+      if (solo) {
+        const sh = Math.min(23, Number(solo[1]) || 0);
+        const sm = Math.min(59, Number(solo[2] || '0') || 0);
+        parsed.start = pad2(sh) + ':' + pad2(sm);
+        parsed.end = addMinutes(parsed.start, 120);
+        parsed.hasTime = true;
+      }
+    }
+
+    // Remove date/time hints from the final title to keep entries clean.
+    parsed.title = src
+      .replace(/\b(demain|aujourd\s*hui|today|tomorrow)\b/gi, ' ')
+      .replace(/\b(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi, ' ')
+      .replace(/\d{1,2}\s*[h:]\s*\d{0,2}\s*(?:-|a|à|->|→)?\s*\d{0,2}\s*[h:]?\s*\d{0,2}/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!parsed.title) parsed.title = src;
+    return parsed;
+  }
+
+  function mergeConsecutiveEvents(events) {
+    const list = [...(events || [])].sort(function (a, b) {
+      return String(a.start || '').localeCompare(String(b.start || ''));
+    });
+    const merged = [];
+    list.forEach(function (ev) {
+      if (!merged.length) {
+        merged.push(Object.assign({}, ev));
+        return;
+      }
+      const prev = merged[merged.length - 1];
+      const sameMeta = String(prev.title || '') === String(ev.title || '')
+        && String(prev.color || '') === String(ev.color || '')
+        && String(prev.location || '') === String(ev.location || '')
+        && String(prev.prof || '') === String(ev.prof || '')
+        && String(prev.type || '') === String(ev.type || '');
+      const contiguous = String(prev.end || '') && String(ev.start || '') && minutes(prev.end) === minutes(ev.start);
+      if (sameMeta && contiguous) {
+        prev.end = ev.end || prev.end;
+        return;
+      }
+      merged.push(Object.assign({}, ev));
+    });
+    return merged;
+  }
+
+  function applyTheme() {
+    ensureSettingsDefaults();
+    const pref = S.settings.themeMode;
+    const isDark = pref === 'dark' || (pref === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.documentElement.style.setProperty('--accent', S.settings.accent || '#007AFF');
+  }
+
+  function toast(msg) {
+    let wrap = document.getElementById('toast-wrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'toast-wrap';
+      wrap.className = 'toast-wrap';
+      document.body.appendChild(wrap);
+    }
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3600);
+  }
+
+  function canUseSystemNotifications() {
+    return typeof window.Notification !== 'undefined';
+  }
+
+  async function requestSystemNotificationPermission() {
+    if (!canUseSystemNotifications()) {
+      toast('Notifications systeme non supportees sur ce navigateur.');
+      return 'unsupported';
+    }
+    if (Notification.permission === 'granted') return 'granted';
+    return Notification.requestPermission();
+  }
+
+  function notifySystem(title, body) {
+    if (!canUseSystemNotifications() || Notification.permission !== 'granted') return;
+    try {
+      const n = new Notification(title, { body: body });
+      setTimeout(function () { n.close(); }, 5000);
+    } catch (e) {
+      // ignore notification runtime errors
+    }
+  }
+
+  function navigateTo(viewKey) {
+    S.view = viewKey;
+    save();
+    renderView();
+  }
+
+  function labelizeNavItems() {
+    document.querySelectorAll('.nav-item').forEach((item) => {
+      if (item.querySelector('.nav-txt')) return;
+      const node = item.childNodes[item.childNodes.length - 2];
+      const text = (node && node.textContent ? node.textContent : '').trim();
+      if (!text) return;
+      const span = document.createElement('span');
+      span.className = 'nav-txt';
+      span.textContent = text;
+      node.textContent = '';
+      item.insertBefore(span, item.querySelector('.cnt') || null);
+    });
+  }
+
+  function addSidebarToggle() {
+    const title = document.querySelector('.app-title');
+    if (!title || document.getElementById('sidebar-toggle')) return;
+    const icon = title.querySelector('svg');
+    const lbl = document.createElement('span');
+    lbl.textContent = title.textContent.trim();
+    title.textContent = '';
+    if (icon) title.appendChild(icon);
+    title.appendChild(lbl);
+    const btn = document.createElement('button');
+    btn.id = 'sidebar-toggle';
+    btn.className = 'sidebar-toggle';
+    btn.title = 'Reduire la barre';
+    btn.textContent = S.sidebarCollapsed ? '»' : '«';
+    btn.onclick = function () {
+      S.sidebarCollapsed = !S.sidebarCollapsed;
+      document.body.classList.toggle('sidebar-collapsed', S.sidebarCollapsed);
+      btn.textContent = S.sidebarCollapsed ? '»' : '«';
+      save();
+    };
+    title.appendChild(btn);
+    document.body.classList.toggle('sidebar-collapsed', S.sidebarCollapsed);
+  }
+
+  function addNavIfMissing(id, view, label, svgPath) {
+    if (document.getElementById(id)) return;
+    const section = document.querySelector('.sidebar-nav .nav-section:last-child');
+    if (!section) return;
+    const node = document.createElement('div');
+    node.className = 'nav-item';
+    node.id = id;
+    node.onclick = function () { gotoView(view, this); };
+    node.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">' + svgPath + '</svg><span class="nav-txt">' + label + '</span>';
+    section.appendChild(node);
+  }
+
+  function ensureTopbarTools() {
+    const topbar = document.querySelector('.topbar');
+    const right = document.getElementById('topbar-right');
+    if (!topbar || !right || document.getElementById('topbar-global')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'topbar-global';
+    wrap.className = 'topbar-global';
+    wrap.innerHTML = '' +
+      '<button class="btn" id="btn-theme" title="Theme">🌓</button>' +
+      '<button class="btn" id="btn-quick" title="Ajout rapide">+ Rapide</button>';
+    topbar.insertBefore(wrap, right);
+
+
+    document.getElementById('btn-theme').onclick = function () {
+      const curr = S.settings.themeMode;
+      S.settings.themeMode = curr === 'system' ? 'light' : (curr === 'light' ? 'dark' : 'system');
+      save();
+      applyTheme();
+      toast('Theme: ' + S.settings.themeMode);
+    };
+
+    document.getElementById('btn-quick').onclick = function () {
+      openQuickAdd();
+    };
+  }
+
+  function ensureMobileNav() {
+    if (document.getElementById('mobile-nav')) return;
+    const nav = document.createElement('div');
+    nav.id = 'mobile-nav';
+    nav.className = 'mobile-nav';
+    nav.innerHTML = MOBILE_VIEWS.map(function (v) {
+      return '<button data-view="' + v.key + '">' + v.label + '</button>';
+    }).join('');
+    document.body.appendChild(nav);
+    nav.addEventListener('click', function (e) {
+      const btn = e.target.closest('button[data-view]');
+      if (!btn) return;
+      navigateTo(btn.getAttribute('data-view'));
+    });
+  }
+
+  function updateMobileNavState() {
+    const nav = document.getElementById('mobile-nav');
+    if (!nav) return;
+    nav.querySelectorAll('button').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-view') === S.view);
+    });
+  }
+
+  function ensureFabQuickAdd() {
+    if (document.getElementById('fab-quick-add')) return;
+    const b = document.createElement('button');
+    b.id = 'fab-quick-add';
+    b.className = 'fab-quick-add';
+    b.title = 'Ajout rapide';
+    b.textContent = '+';
+    b.onclick = openQuickAdd;
+    document.body.appendChild(b);
+  }
+
+  function openQuickAdd() {
+    const id = 'quick-add-modal';
+    const old = document.getElementById(id);
+    if (old) old.remove();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = id;
+    overlay.onclick = function (e) { if (e.target === overlay) overlay.remove(); };
+    overlay.innerHTML = '' +
+      '<div class="modal">' +
+      '<div class="modal-title">Ajout rapide<button class="btn" onclick="document.getElementById(\'' + id + '\').remove()">✕</button></div>' +
+      '<div class="modal-row"><select class="modal-field" id="qa-kind"><option value="task">Tache</option><option value="event">Evenement</option></select><input class="modal-field" id="qa-date" type="date" value="' + todayStr() + '"/></div>' +
+      '<input class="modal-field" id="qa-title" placeholder="Titre... (ex: JEE jeudi 14h)" />' +
+      '<div class="modal-row"><input class="modal-field" id="qa-start" type="time" value="08:30" /><input class="modal-field" id="qa-end" type="time" value="10:30" /></div>' +
+      '<div class="detail-label" style="margin-bottom:6px">Couleur</div>' +
+      '<div class="modal-row"><input class="modal-field" id="qa-color" type="color" value="#3b82f6" /></div>' +
+      '<div class="modal-actions"><button class="btn" onclick="document.getElementById(\'' + id + '\').remove()">Annuler</button><button class="btn btn-primary" onclick="quickAddSubmit()">Ajouter</button></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+  }
+
+  window.openQuickAdd = openQuickAdd;
+
+  window.quickAddSubmit = function () {
+    const kind = (document.getElementById('qa-kind') || {}).value || 'task';
+    const rawTitle = ((document.getElementById('qa-title') || {}).value || '').trim();
+    const date = (document.getElementById('qa-date') || {}).value || todayStr();
+    if (!rawTitle) return;
+    const intent = parseQuickIntent(rawTitle, date);
+    const title = intent.title;
+
+    if (kind === 'task') {
+      const rawStart = (document.getElementById('qa-start') || {}).value || '08:00';
+      const rawEnd = (document.getElementById('qa-end') || {}).value || '10:00';
+      const pick = (document.getElementById('qa-color') || {}).value || '#3b82f6';
+      const start = intent.hasTime ? intent.start : rawStart;
+      const end = intent.hasTime ? intent.end : rawEnd;
+      const task = {
+        id: 't' + Date.now(),
+        name: title,
+        matiere: '',
+        priority: 'Moyenne',
+        status: 'À faire',
+        due: intent.date,
+        starred: S.view === 'important',
+        myDay: intent.date === todayStr(),
+        done: false,
+        color: eventColorToHex(pick),
+        plannedStart: start,
+        plannedEnd: end,
+        subtasks: [],
+        notes: '',
+      };
+      S.tasks.unshift(task);
+      if (typeof window.syncTaskIntoCalendar === 'function') {
+        window.syncTaskIntoCalendar(task);
+      }
+      toast('Tache ajoutee');
+    } else {
+      const rawStart = (document.getElementById('qa-start') || {}).value || '08:00';
+      const rawEnd = (document.getElementById('qa-end') || {}).value || '10:00';
+      const pick = (document.getElementById('qa-color') || {}).value || '#3b82f6';
+      const start = intent.hasTime ? intent.start : rawStart;
+      const end = intent.hasTime ? intent.end : rawEnd;
+      S.calEvents.push({
+        id: 'ev' + Date.now(),
+        title: title,
+        date: intent.date,
+        start: start,
+        end: end,
+        location: '',
+        prof: '',
+        color: eventColorToHex(pick),
+        important: false,
+        notes: '',
+        type: 'course',
+      });
+      toast('Evenement ajoute');
+    }
+    const modal = document.getElementById('quick-add-modal');
+    if (modal) modal.remove();
+    save();
+    renderView();
+  };
+
+  function weekKey(offset) {
+    const base = getMondayOf(offset || 0);
+    return dateStr(base);
+  }
+
+  function isCurrentWeekKey(key) {
+    return String(key || '') === weekKey(0);
+  }
+
+  function pruneOldCompletedGoals() {
+    ensureGoalsStore._guard = true;
+    const now = new Date(todayStr() + 'T00:00:00');
+    const keys = Object.keys(S.goalWeeks || {});
+    keys.forEach(function (k) {
+      const list = S.goalWeeks[k] || [];
+      const wk = new Date(String(k) + 'T00:00:00');
+      const ageDays = Math.floor((now - wk) / 86400000);
+      if (ageDays > 90) {
+        S.goalWeeks[k] = list.filter(function (g) { return !g.done; });
+      }
+      if (!S.goalWeeks[k].length && !isCurrentWeekKey(k)) {
+        delete S.goalWeeks[k];
+      }
+    });
+    delete ensureGoalsStore._guard;
+  }
+
+  function weekLabel(key) {
+    const d = new Date(String(key) + 'T00:00:00');
+    const end = new Date(d);
+    end.setDate(d.getDate() + 6);
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) + ' - ' + end.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+  }
+
+  function ensureGoalsStore() {
+    if (ensureGoalsStore._guard) return;
+    S.goalWeeks = S.goalWeeks || {};
+    const currKey = weekKey(0);
+    const nextKey = weekKey(1);
+    if (!S.goalWeeks[currKey] && Array.isArray(S.weekGoals) && S.weekGoals.length) {
+      S.goalWeeks[currKey] = S.weekGoals.map(function (g) { return { text: g.text, done: !!g.done, weekKey: currKey, createdAt: Date.now() }; });
+    }
+    if (!S.goalWeeks[nextKey] && Array.isArray(S.weekGoalsNext) && S.weekGoalsNext.length) {
+      S.goalWeeks[nextKey] = S.weekGoalsNext.map(function (g) { return { text: g.text, done: !!g.done, weekKey: nextKey, createdAt: Date.now() }; });
+    }
+    S.goalSelectedWeek = S.goalSelectedWeek || currKey;
+    pruneOldCompletedGoals();
+  }
+
+  function renderGoalsHub() {
+    ensureGoalsStore();
+    const key = S.goalSelectedWeek;
+    const goals = S.goalWeeks[key] || (S.goalWeeks[key] = []);
+    const canEdit = isCurrentWeekKey(key);
+    const historyKeys = Object.keys(S.goalWeeks).sort().reverse();
+
+    const html = '' +
+      '<div class="import-card">' +
+      '<div class="goal-week-title">' +
+      '<span>Objectifs de la semaine ' + weekLabel(key) + '</span>' +
+      '<div class="goal-week-actions">' +
+      '<button class="btn" onclick="shiftGoalWeek(-1)">Semaine -</button> ' +
+      '<button class="btn" onclick="shiftGoalWeek(1)">Semaine +</button>' +
+      '</div></div>' +
+      (canEdit ? '' : '<div class="score-pill" style="margin:8px 0 12px 0">Lecture seule (historique)</div>') +
+      '<div>' +
+      (goals.length ? goals.map(function (g, i) {
+        return '<div class="wg-item ' + (g.done ? 'wg-done' : '') + '">' +
+          '<div class="check-btn ' + (g.done ? 'checked' : '') + '" ' + (canEdit ? ('onclick="toggleGoalForWeek(' + i + ')"') : '') + '></div>' +
+          '<span>' + g.text + '</span>' +
+          (canEdit ? ('<button class="wg-del" onclick="delGoalForWeek(' + i + ')">✕</button>') : '') +
+          '</div>';
+      }).join('') : '<div class="empty-state" style="padding:18px">Aucun objectif pour cette semaine</div>') +
+      '</div>' +
+      (canEdit ? '<div class="week-add-row"><input id="goal-hub-inp" placeholder="Nouvel objectif..." onkeydown="if(event.key===\'Enter\')addGoalForWeek()"/><button class="btn btn-primary" onclick="addGoalForWeek()">+</button></div>' : '') +
+      '</div>' +
+      '<div class="import-card"><div class="goal-week-title"><span>Historique</span><span class="score-pill">' + historyKeys.length + ' semaines</span></div>' +
+      historyKeys.map(function (k) {
+        const list = S.goalWeeks[k] || [];
+        const pending = list.filter(function (x) { return !x.done; });
+        return '<details class="goals-history-item"><summary>' + weekLabel(k) + ' - ' + list.length + ' objectifs' + (pending.length ? (' • ' + pending.length + ' en attente') : '') + '</summary>' +
+          '<div style="margin-top:10px">' + list.map(function (g) {
+            return '<div style="font-size:13px;color:#6E6E73;margin-bottom:4px">' + (g.done ? '✅ ' : '🟡 ') + g.text + '</div>';
+          }).join('') +
+          (pending.length ? '<button class="btn" style="margin-top:8px" onclick="copyPendingGoals(\'' + k + '\')">Copier les non termines</button>' : '') +
+          '</div></details>';
+      }).join('') +
+      '</div>';
+
+    document.getElementById('view-title').textContent = 'Objectifs hebdo';
+    document.getElementById('topbar-right').innerHTML = '';
+    document.getElementById('content').innerHTML = html;
+  }
+
+  window.shiftGoalWeek = function (dir) {
+    const d = new Date(S.goalSelectedWeek + 'T00:00:00');
+    d.setDate(d.getDate() + (dir * 7));
+    S.goalSelectedWeek = dateStr(d);
+    save();
+    renderView();
+  };
+
+  window.addGoalForWeek = function () {
+    ensureGoalsStore();
+    if (!isCurrentWeekKey(S.goalSelectedWeek)) {
+      toast('Semaine passee en lecture seule.');
+      return;
+    }
+    const inp = document.getElementById('goal-hub-inp');
+    const txt = ((inp || {}).value || '').trim();
+    if (!txt) return;
+    S.goalWeeks[S.goalSelectedWeek] = S.goalWeeks[S.goalSelectedWeek] || [];
+    S.goalWeeks[S.goalSelectedWeek].push({ text: txt, done: false, weekKey: S.goalSelectedWeek, createdAt: Date.now() });
+    if (inp) inp.value = '';
+    save();
+    renderView();
+  };
+
+  window.toggleGoalForWeek = function (i) {
+    ensureGoalsStore();
+    if (!isCurrentWeekKey(S.goalSelectedWeek)) {
+      toast('Semaine passee en lecture seule.');
+      return;
+    }
+    const arr = S.goalWeeks[S.goalSelectedWeek] || [];
+    if (!arr[i]) return;
+    arr[i].done = !arr[i].done;
+    save();
+    renderView();
+  };
+
+  window.delGoalForWeek = function (i) {
+    ensureGoalsStore();
+    if (!isCurrentWeekKey(S.goalSelectedWeek)) {
+      toast('Semaine passee en lecture seule.');
+      return;
+    }
+    const arr = S.goalWeeks[S.goalSelectedWeek] || [];
+    arr.splice(i, 1);
+    save();
+    renderView();
+  };
+
+  window.copyPendingGoals = function (sourceKey) {
+    ensureGoalsStore();
+    const target = S.goalWeeks[S.goalSelectedWeek] || (S.goalWeeks[S.goalSelectedWeek] = []);
+    const existing = new Set(target.map(function (g) { return String(g.text || '').trim().toLowerCase(); }));
+    (S.goalWeeks[sourceKey] || []).filter(function (g) { return !g.done; }).forEach(function (g) {
+      const key = String(g.text || '').trim().toLowerCase();
+      if (!key || existing.has(key)) return;
+      target.push({ text: g.text, done: false, weekKey: S.goalSelectedWeek, createdAt: Date.now() });
+      existing.add(key);
+    });
+    save();
+    renderView();
+  };
+
+  function renderImportHub() {
+    document.getElementById('view-title').textContent = 'Import ENSAM';
+    document.getElementById('topbar-right').innerHTML = '<button class="btn btn-primary" onclick="openEnsamImport()">Importer un emploi du temps</button>';
+    document.getElementById('content').innerHTML = '' +
+      '<div class="import-card">' +
+      '<h3 style="margin-bottom:8px">Importer via PDF, image ou texte</h3>' +
+      '<p style="font-size:14px;color:#6E6E73;margin-bottom:12px">Utilisez le module ENSAM pour extraire automatiquement les cours et les convertir en evenements calendrier.</p>' +
+      '<button class="btn btn-primary" onclick="openEnsamImport()">Ouvrir le module d\'import</button>' +
+      '</div>' +
+      '<div class="import-card">' +
+      '<h3 style="margin-bottom:8px">Conseils qualite</h3>' +
+      '<ul style="padding-left:18px;color:#6E6E73">' +
+      '<li>Preferer un PDF texte non scanne.</li>' +
+      '<li>Verifier le lundi de debut avant import.</li>' +
+      '<li>Toutes les seances importees sont harmonisees en bleu ENSAM.</li>' +
+      '</ul>' +
+      '</div>';
+  }
+
+  function renderAnalytics() {
+    const tasks = S.tasks || [];
+    const events = S.calEvents || [];
+    const done = tasks.filter(function (t) { return !!t.done; }).length;
+    const completion = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+    const byMatter = {};
+    const minutesByMatter = {};
+    tasks.forEach(function (t) {
+      const k = t.matiere || 'General';
+      byMatter[k] = (byMatter[k] || 0) + 1;
+    });
+    events.forEach(function (e) {
+      const k = e.title || 'General';
+      const start = minutes(e.start || '08:00');
+      const end = Math.max(start, minutes(e.end || e.start || '08:00'));
+      const dur = Math.max(30, end - start);
+      minutesByMatter[k] = (minutesByMatter[k] || 0) + dur;
+    });
+
+    const trendDays = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const ds = dateStr(d);
+      const lbl = d.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
+      const doneCount = tasks.filter(function (t) {
+        return t.done && t.updatedAt && String(t.updatedAt).slice(0, 10) === ds;
+      }).length;
+      trendDays.push({ label: lbl, value: doneCount });
+    }
+    if (!trendDays.some(function (x) { return x.value > 0; })) {
+      // Fallback simple when historical completion dates are absent.
+      trendDays[6].value = tasks.filter(function (t) { return t.done; }).length;
+    }
+    const maxTrend = Math.max(1, Math.max.apply(null, trendDays.map(function (x) { return x.value; })));
+    const topMinutes = Object.keys(minutesByMatter).sort(function (a, b) { return minutesByMatter[b] - minutesByMatter[a]; }).slice(0, 5);
+    const productivity = Math.min(100, Math.round((completion * 0.6) + (Math.min(events.length, 20) * 2)));
+
+    document.getElementById('view-title').textContent = 'Analytics';
+    document.getElementById('topbar-right').innerHTML = '<span class="score-pill">Score ' + productivity + '/100</span>';
+    document.getElementById('content').innerHTML = '' +
+      '<div class="analytics-grid">' +
+      '<div class="analytics-card"><div style="font-size:12px;color:#8E8E93">Taux de completion</div><div style="font-size:30px;font-weight:700">' + completion + '%</div></div>' +
+      '<div class="analytics-card"><div style="font-size:12px;color:#8E8E93">Taches terminees</div><div style="font-size:30px;font-weight:700">' + done + '</div></div>' +
+      '<div class="analytics-card"><div style="font-size:12px;color:#8E8E93">Evenements planifies</div><div style="font-size:30px;font-weight:700">' + events.length + '</div></div>' +
+      '<div class="analytics-card"><div style="font-size:12px;color:#8E8E93">Taches en retard</div><div style="font-size:30px;font-weight:700">' + tasks.filter(function (t) { return !t.done && t.due && t.due < todayStr(); }).length + '</div></div>' +
+      '</div>' +
+      '<div class="analytics-card"><h3 style="margin-bottom:8px">Charge par matiere</h3>' +
+      Object.keys(byMatter).sort(function (a, b) { return byMatter[b] - byMatter[a]; }).map(function (k) {
+        return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>' + k + '</span><strong>' + byMatter[k] + '</strong></div>';
+      }).join('') +
+      '</div>' +
+      '<div class="analytics-card"><h3 style="margin-bottom:8px">Tendance 7 jours</h3>' +
+      trendDays.map(function (d) {
+        const pct = Math.round((d.value / maxTrend) * 100);
+        return '<div class="chart-row"><span style="font-size:12px;color:#6E6E73">' + d.label + '</span><div class="chart-track"><div class="chart-fill" style="width:' + pct + '%"></div></div><strong style="font-size:12px">' + d.value + '</strong></div>';
+      }).join('') +
+      '</div>' +
+      '<div class="analytics-card"><h3 style="margin-bottom:8px">Temps par matiere (estime)</h3>' +
+      (topMinutes.length ? topMinutes.map(function (k) {
+        const h = (minutesByMatter[k] / 60).toFixed(1);
+        return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>' + k + '</span><strong>' + h + 'h</strong></div>';
+      }).join('') : '<div style="font-size:13px;color:#6E6E73">Ajoutez des evenements avec horaire pour calculer le temps.</div>') +
+      '</div>' +
+      '<div class="analytics-card"><h3 style="margin-bottom:8px">Badges</h3>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<span class="score-pill">' + (completion >= 70 ? '🏆 Focus Master' : '🎯 Keep Going') + '</span>' +
+      '<span class="score-pill">' + (events.length >= 8 ? '📅 Planner Pro' : '🗓️ Calendar Starter') + '</span>' +
+      '<span class="score-pill">' + (tasks.length >= 10 ? '📚 Heavy Learner' : '📝 Building Habits') + '</span>' +
+      '</div></div>';
+  }
+
+  function renderSettings() {
+    ensureSettingsDefaults();
+    document.getElementById('view-title').textContent = 'Reglages';
+    document.getElementById('topbar-right').innerHTML = '';
+    document.getElementById('content').innerHTML = '' +
+      '<div class="settings-grid">' +
+      '<div class="settings-card">' +
+      '<h3 style="margin-bottom:10px">Apparence</h3>' +
+      '<label style="display:block;font-size:13px;margin-bottom:6px">Theme</label>' +
+      '<select class="detail-field" id="set-theme" onchange="updateSettingTheme(this.value)">' +
+      '<option value="system" ' + (S.settings.themeMode === 'system' ? 'selected' : '') + '>Systeme</option>' +
+      '<option value="light" ' + (S.settings.themeMode === 'light' ? 'selected' : '') + '>Clair</option>' +
+      '<option value="dark" ' + (S.settings.themeMode === 'dark' ? 'selected' : '') + '>Sombre</option>' +
+      '</select>' +
+      '<label style="display:block;font-size:13px;margin-bottom:6px">Couleur accent</label>' +
+      '<input class="detail-field" type="color" id="set-accent" value="' + (S.settings.accent || '#007AFF') + '" onchange="updateSettingAccent(this.value)" />' +
+      '</div>' +
+      '<div class="settings-card">' +
+      '<h3 style="margin-bottom:10px">Productivite</h3>' +
+      '<label style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><input type="checkbox" ' + (S.settings.notifications ? 'checked' : '') + ' onchange="toggleSettingNotifications(this.checked)"/> Activer les rappels</label>' +
+      '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" ' + (S.sidebarCollapsed ? 'checked' : '') + ' onchange="toggleSettingSidebar(this.checked)"/> Sidebar compacte</label>' +
+      '<div style="margin-top:10px"><button class="btn" onclick="enableSystemNotifications()">Autoriser notifications systeme</button></div>' +
+      '<div style="margin-top:10px"><button class="btn" onclick="sendTestNotification()">Envoyer un rappel test</button></div>' +
+      '</div>' +
+      '</div>';
+
+    const list = (S.settings.subjectColors || []).map(function (s, i) {
+      return '<div class="subject-row">' +
+        '<input type="color" value="' + eventColorToHex(s.color || 'ev-blue') + '" onchange="updateSubjectColor(' + i + ', this.value)" />' +
+        '<input type="text" value="' + String(s.name || '').replace(/"/g, '&quot;') + '" placeholder="Matiere" onchange="updateSubjectName(' + i + ', this.value)" />' +
+        '<button class="btn" onclick="removeSubjectColor(' + i + ')">Suppr.</button>' +
+        '</div>';
+    }).join('');
+
+    document.getElementById('content').innerHTML += '' +
+      '<div class="settings-card" style="margin-top:12px">' +
+      '<h3 style="margin-bottom:10px">Matieres & codes couleur</h3>' +
+      '<p style="font-size:13px;color:#6E6E73;margin-bottom:10px">Les evenements prennent automatiquement la couleur de leur matiere si le titre correspond.</p>' +
+      '<div>' + list + '</div>' +
+      '<div class="subject-add-row">' +
+      '<input id="subject-name" type="text" placeholder="Nouvelle matiere..." />' +
+      '<input id="subject-color" type="color" value="#3b82f6" />' +
+      '<button class="btn btn-primary" onclick="addSubjectColor()">Ajouter</button>' +
+      '</div>' +
+      '<div style="margin-top:10px"><button class="btn" onclick="applySubjectColorsToExistingEvents()">Appliquer aux evenements existants</button></div>' +
+      '</div>';
+  }
+
+  window.addSubjectColor = function () {
+    const n = (document.getElementById('subject-name') || {}).value || '';
+    const c = (document.getElementById('subject-color') || {}).value || '#3b82f6';
+    const name = n.trim();
+    if (!name) return;
+    S.settings.subjectColors = S.settings.subjectColors || [];
+    S.settings.subjectColors.push({ name: name, color: hexToEventColor(c) });
+    save();
+    renderView();
+  };
+
+  window.updateSubjectColor = function (idx, hex) {
+    if (!S.settings.subjectColors || !S.settings.subjectColors[idx]) return;
+    S.settings.subjectColors[idx].color = hexToEventColor(hex);
+    save();
+  };
+
+  window.updateSubjectName = function (idx, name) {
+    if (!S.settings.subjectColors || !S.settings.subjectColors[idx]) return;
+    S.settings.subjectColors[idx].name = String(name || '').trim();
+    save();
+  };
+
+  window.removeSubjectColor = function (idx) {
+    if (!S.settings.subjectColors) return;
+    S.settings.subjectColors.splice(idx, 1);
+    save();
+    renderView();
+  };
+
+  window.applySubjectColorsToExistingEvents = function () {
+    let updated = 0;
+    (S.calEvents || []).forEach(function (ev) {
+      const inferred = inferSubjectColor(ev.title);
+      if (inferred && ev.color !== inferred) {
+        ev.color = inferred;
+        updated++;
+      }
+    });
+    save();
+    toast(updated ? (updated + ' evenement(s) recolores.') : 'Aucune modification.');
+    renderView();
+  };
+
+  window.enableSystemNotifications = async function () {
+    const perm = await requestSystemNotificationPermission();
+    if (perm === 'granted') toast('Notifications systeme activees.');
+    else if (perm !== 'unsupported') toast('Permission notifications: ' + perm);
+  };
+
+  window.sendTestNotification = function () {
+    if (!S.settings.notifications) {
+      toast('Activez d abord les rappels dans les reglages.');
+      return;
+    }
+    notifySystem('Academic Hub Pro', 'Rappel test: votre planification est active.');
+    toast('Rappel test envoye (si autorise).');
+  };
+
+  window.updateSettingTheme = function (v) {
+    S.settings.themeMode = v;
+    save();
+    applyTheme();
+    toast('Theme mis a jour');
+  };
+
+  window.updateSettingAccent = function (v) {
+    S.settings.accent = v;
+    save();
+    applyTheme();
+    toast('Accent mis a jour');
+  };
+
+  window.toggleSettingNotifications = function (checked) {
+    S.settings.notifications = !!checked;
+    if (S.settings.notifications) {
+      requestSystemNotificationPermission().then(function () {});
+    }
+    save();
+  };
+
+  window.toggleSettingSidebar = function (checked) {
+    S.sidebarCollapsed = !!checked;
+    document.body.classList.toggle('sidebar-collapsed', S.sidebarCollapsed);
+    const btn = document.getElementById('sidebar-toggle');
+    if (btn) btn.textContent = S.sidebarCollapsed ? '»' : '«';
+    save();
+  };
+
+  function renderSearchView() {
+    const q = (S.searchQ || '').trim().toLowerCase();
+    document.getElementById('view-title').textContent = 'Recherche';
+    document.getElementById('topbar-right').innerHTML = '<span class="score-pill">' + (q ? ('"' + S.searchQ + '"') : 'Aucun filtre') + '</span>';
+    if (!q) {
+      document.getElementById('content').innerHTML = '<div class="empty-state">Tapez une recherche globale puis validez avec Entree.</div>';
+      return;
+    }
+
+    ensureGoalsStore();
+
+    const tasks = S.tasks.filter(function (t) {
+      const txt = [t.name, t.matiere, t.notes].join(' ').toLowerCase();
+      return txt.includes(q);
+    }).map(function (t) { return { kind: 'Tache', title: t.name, sub: (t.due || 'Sans date') + (t.matiere ? (' • ' + t.matiere) : '') }; });
+
+    const events = S.calEvents.filter(function (e) {
+      return [e.title, e.location, e.prof, e.notes].join(' ').toLowerCase().includes(q);
+    }).map(function (e) { return { kind: 'Evenement', title: e.title, sub: (e.date || '') + ' ' + (e.start || '') + (e.location ? (' • ' + e.location) : '') }; });
+
+    const ideas = S.ideas.filter(function (i) {
+      return String(i.text || '').toLowerCase().includes(q);
+    }).map(function (i) { return { kind: 'Idee', title: i.text.slice(0, 70), sub: new Date(i.ts).toLocaleDateString('fr-FR') }; });
+
+    const goals = [];
+    Object.keys(S.goalWeeks).forEach(function (wk) {
+      (S.goalWeeks[wk] || []).forEach(function (g) {
+        if (String(g.text || '').toLowerCase().includes(q)) {
+          goals.push({ kind: 'Objectif', title: g.text, sub: weekLabel(wk) + (g.done ? ' • termine' : ' • en cours') });
+        }
+      });
+    });
+
+    const all = tasks.concat(events, ideas, goals);
+    document.getElementById('content').innerHTML = all.length ?
+      '<div class="search-grid">' + all.map(function (r) {
+        return '<div class="search-result-card"><div style="font-size:12px;color:#8E8E93">' + r.kind + '</div><div style="font-weight:600;margin:4px 0">' + r.title + '</div><div style="font-size:12px;color:#6E6E73">' + r.sub + '</div></div>';
+      }).join('') + '</div>' :
+      '<div class="empty-state">Aucun resultat pour "' + S.searchQ + '".</div>';
+  }
+
+  function getMyDayTasks(today) {
+    const map = {};
+    (S.tasks || []).forEach(function (t) {
+      if (t.done) return;
+      if (t.due === today || t.myDay) {
+        map[t.id] = t;
+      }
+    });
+    return Object.keys(map).map(function (id) { return map[id]; });
+  }
+
+  function getWeekGoalsForToday() {
+    ensureGoalsStore();
+    const monday = getMondayForDate(new Date());
+    const key = dateStr(monday);
+    return S.goalWeeks[key] || [];
+  }
+
+  function renderMyDayHub() {
+    const today = todayStr();
+    const dayEvents = (S.calEvents || []).filter(function (e) { return e.date === today; }).sort(function (a, b) {
+      return String(a.start || '').localeCompare(String(b.start || ''));
+    });
+    const dayTasks = getMyDayTasks(today);
+    const weekGoals = getWeekGoalsForToday();
+    const doneGoals = weekGoals.filter(function (g) { return g.done; }).length;
+    const overdue = (S.tasks || []).filter(function (t) { return !t.done && t.due && t.due < today; }).length;
+
+    document.getElementById('view-title').textContent = 'My Day';
+    document.getElementById('topbar-right').innerHTML = '' +
+      '<button class="btn" onclick="openNewEvent(\'' + today + '\',\'08:30\')">+ Evenement</button>';
+
+    const todayLabel = new Date(today + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    let html = '' +
+      '<div class="import-card" style="margin-bottom:14px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">' +
+      '<div><div style="font-size:12px;color:var(--text-3)">Vue intelligente du jour</div><div style="font-size:20px;font-weight:600;text-transform:capitalize">' + todayLabel + '</div></div>' +
+      '<span class="score-pill">Focus ' + Math.max(10, Math.min(100, 100 - overdue * 10)) + '/100</span>' +
+      '</div>' +
+      '</div>' +
+      '<div class="stats-row" style="margin-bottom:12px">' +
+      '<div class="stat-card blue"><div class="stat-val">' + dayEvents.length + '</div><div class="stat-lbl">Evenements du jour</div></div>' +
+      '<div class="stat-card green"><div class="stat-val">' + dayTasks.length + '</div><div class="stat-lbl">Taches actives</div></div>' +
+      '<div class="stat-card amber"><div class="stat-val">' + doneGoals + '/' + weekGoals.length + '</div><div class="stat-lbl">Objectifs semaine</div></div>' +
+      '<div class="stat-card red"><div class="stat-val">' + overdue + '</div><div class="stat-lbl">En retard</div></div>' +
+      '</div>' +
+      '<div class="analytics-grid" style="grid-template-columns:1.2fr 1fr">';
+
+    html += '' +
+      '<div class="import-card">' +
+      '<h3 style="margin-bottom:8px">Timeline du jour</h3>' +
+      (dayEvents.length ? dayEvents.map(function (e) {
+        return '<div class="agenda-item badge" style="display:block;margin-bottom:8px;' + colorStyleInline(e.color, 'ev-blue') + '">' +
+          '<strong>' + (e.start || '--:--') + (e.end ? (' - ' + e.end) : '') + '</strong> • ' + e.title +
+          (e.location ? ('<div style="font-size:11px;opacity:.8">' + e.location + '</div>') : '') +
+          '</div>';
+      }).join('') : '<div class="empty-state" style="padding:12px">Aucun evenement aujourd\'hui.</div>') +
+      '</div>';
+
+    html += '' +
+      '<div class="import-card">' +
+      '<h3 style="margin-bottom:8px">Objectifs de la semaine</h3>' +
+      (weekGoals.length ? weekGoals.map(function (g, i) {
+        return '<div class="wg-item ' + (g.done ? 'wg-done' : '') + '">' +
+          '<div class="check-btn ' + (g.done ? 'checked' : '') + '" onclick="toggleTodayGoal(' + i + ')"></div>' +
+          '<span>' + g.text + '</span>' +
+          '</div>';
+      }).join('') : '<div class="empty-state" style="padding:12px">Aucun objectif pour cette semaine.</div>') +
+      '<div style="margin-top:10px"><button class="btn" onclick="gotoView(\'goals\',document.getElementById(\'nav-goals\'))">Gerer les objectifs</button></div>' +
+      '</div>';
+
+    html += '</div>';
+
+    html += '' +
+      '<div class="import-card" style="margin-top:12px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">' +
+      '<h3>Taches du jour (suivi)</h3>' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+      '<span class="score-pill">' + dayTasks.length + '</span>' +
+      '<button class="btn" onclick="openQuickAddTodayTask()">+ Nouvelle tache</button>' +
+      '</div>' +
+      '</div>' +
+      (dayTasks.length ? dayTasks.map(function (t) {
+        const st = t.plannedStart || '08:00';
+        const en = t.plannedEnd || '10:00';
+        return '<div class="sub-item" style="padding:10px 12px;margin-bottom:6px;gap:10px">' +
+          '<span style="font-weight:600;min-width:96px">' + st + ' - ' + en + '</span>' +
+          '<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + t.name + '</span>' +
+          '<button class="btn" style="padding:4px 10px" onclick="openMyDayTaskPanel(\'' + t.id + '\')">Etendre</button>' +
+          '</div>';
+      }).join('') : '<div class="empty-state" style="padding:12px">Aucune tache active pour aujourd\'hui.</div>') +
+      '</div>';
+
+    document.getElementById('content').innerHTML = html;
+    if (S.myDayExpandedTaskId) {
+      renderMyDayTaskPanel(S.myDayExpandedTaskId);
+    } else {
+      closeMyDayTaskPanel();
+    }
+  }
+
+  function closeMyDayTaskPanel() {
+    const panel = document.getElementById('detail-panel');
+    if (!panel) return;
+    panel.classList.add('hidden');
+    S.myDayExpandedTaskId = null;
+  }
+
+  function renderMyDayTaskPanel(taskId) {
+    const panel = document.getElementById('detail-panel');
+    const inner = document.getElementById('detail-inner');
+    if (!panel || !inner) return;
+    const t = (S.tasks || []).find(function (x) { return x.id === taskId; });
+    if (!t) {
+      closeMyDayTaskPanel();
+      return;
+    }
+    S.myDayExpandedTaskId = taskId;
+    panel.classList.remove('hidden');
+    const st = t.plannedStart || '08:00';
+    const en = t.plannedEnd || '10:00';
+    const syncLabel = t.calendarTaskEventId ? 'Mettre a jour' : 'Planifier';
+    const doneLabel = t.done ? 'Remettre active' : 'Terminer';
+    const starLabel = t.starred ? 'Retirer important' : 'Important';
+    inner.innerHTML = '' +
+      '<div style="display:flex;align-items:center;margin-bottom:14px">' +
+      '<span style="font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Planification</span>' +
+      '<button class="btn" style="margin-left:auto;padding:3px 8px" onclick="closeMyDayTaskPanel()">✕</button>' +
+      '</div>' +
+      '<div style="font-size:16px;font-weight:600;margin-bottom:10px">' + t.name + '</div>' +
+      '<div class="detail-label">Horaire</div>' +
+      '<div class="detail-label">Debut</div>' +
+      '<input class="detail-field" type="time" value="' + st + '" onchange="setTaskScheduleFromMyDay(\'' + t.id + '\',this.value,null)" />' +
+      '<div class="detail-label">Fin</div>' +
+      '<input class="detail-field" type="time" value="' + en + '" onchange="setTaskScheduleFromMyDay(\'' + t.id + '\',null,this.value)" />' +
+      '<div class="detail-label">Couleur</div>' +
+      '<input class="detail-field" type="color" value="' + eventColorToHex(t.color || 'ev-green') + '" onchange="setPlannedTaskColor(\'' + t.id + '\',this.value)" />' +
+      '<div class="modal-actions" style="display:grid;grid-template-columns:1fr;gap:8px;justify-content:stretch">' +
+      '<button class="btn btn-primary" onclick="scheduleTaskFromMyDay(\'' + t.id + '\')">' + syncLabel + '</button>' +
+      '<button class="btn" onclick="toggleDone(\'' + t.id + '\')">' + doneLabel + '</button>' +
+      '<button class="btn" onclick="toggleStar(\'' + t.id + '\')">' + starLabel + '</button>' +
+      '<button class="btn" onclick="openTaskDetailsFromMyDay(\'' + t.id + '\')">Suivi</button>' +
+      '<button class="btn btn-red" onclick="deleteTaskFromMyDay(\'' + t.id + '\')">Supprimer</button>' +
+      '</div>';
+  }
+
+  window.closeMyDayTaskPanel = closeMyDayTaskPanel;
+  window.openMyDayTaskPanel = function (taskId) {
+    renderMyDayTaskPanel(taskId);
+  };
+
+  window.toggleTodayGoal = function (i) {
+    const goals = getWeekGoalsForToday();
+    if (!goals[i]) return;
+    goals[i].done = !goals[i].done;
+    save();
+    renderView();
+  };
+
+  window.scheduleTaskFromMyDay = function (taskId) {
+    const t = (S.tasks || []).find(function (x) { return x.id === taskId; });
+    if (!t) return;
+    const today = todayStr();
+    t.plannedStart = t.plannedStart || '14:00';
+    t.plannedEnd = t.plannedEnd || '16:00';
+    t.color = t.color || 'ev-green';
+    t.due = today;
+    t.myDay = true;
+    if (typeof window.syncTaskIntoCalendar === 'function') {
+      window.syncTaskIntoCalendar(t);
+    }
+    save();
+    toast('Tache planifiee dans le calendrier.');
+    renderView();
+  };
+
+  window.openQuickAddTodayTask = function () {
+    openQuickAdd();
+    setTimeout(function () {
+      const kind = document.getElementById('qa-kind');
+      const date = document.getElementById('qa-date');
+      const start = document.getElementById('qa-start');
+      const end = document.getElementById('qa-end');
+      if (kind) kind.value = 'task';
+      if (date) date.value = todayStr();
+      if (start) start.value = '08:00';
+      if (end) end.value = '10:00';
+    }, 20);
+  };
+
+  window.setTaskScheduleFromMyDay = function (taskId, start, end) {
+    const t = (S.tasks || []).find(function (x) { return x.id === taskId; });
+    if (!t) return;
+    if (start) t.plannedStart = start;
+    if (end) t.plannedEnd = end;
+    t.due = todayStr();
+    t.myDay = true;
+    if (!t.plannedStart) t.plannedStart = '08:00';
+    if (!t.plannedEnd) t.plannedEnd = '10:00';
+    if (typeof window.syncTaskIntoCalendar === 'function') {
+      window.syncTaskIntoCalendar(t);
+    }
+    save();
+    renderView();
+  };
+
+  window.deleteTaskFromMyDay = function (taskId) {
+    if (typeof window.delTask === 'function') {
+      if (S.myDayExpandedTaskId === taskId) S.myDayExpandedTaskId = null;
+      window.delTask(taskId);
+      toast('Tache supprimee.');
+      return;
+    }
+    S.tasks = (S.tasks || []).filter(function (t) { return t.id !== taskId; });
+    S.calEvents = (S.calEvents || []).filter(function (e) { return e.taskId !== taskId; });
+    save();
+    renderView();
+  };
+
+  window.setPlannedTaskColor = function (taskId, hex) {
+    const t = (S.tasks || []).find(function (x) { return x.id === taskId; });
+    if (!t) return;
+    t.color = hexToEventColor(hex);
+    if (typeof window.syncTaskIntoCalendar === 'function') {
+      window.syncTaskIntoCalendar(t);
+    }
+    save();
+    renderView();
+  };
+
+  window.removePlannedTaskFromMyDay = function (taskId) {
+    const t = (S.tasks || []).find(function (x) { return x.id === taskId; });
+    if (!t) return;
+    if (t.calendarTaskEventId) {
+      S.calEvents = (S.calEvents || []).filter(function (e) { return e.id !== t.calendarTaskEventId; });
+    }
+    S.calEvents = (S.calEvents || []).filter(function (e) { return e.taskId !== taskId; });
+    t.calendarTaskEventId = '';
+    t.plannedStart = '';
+    t.plannedEnd = '';
+    save();
+    toast('Planification supprimee (tache conservee).');
+    renderView();
+  };
+
+  window.openTaskDetailsFromMyDay = function (taskId) {
+    S.myDayExpandedTaskId = null;
+    S.selectedTask = taskId;
+    S.view = 'all';
+    renderView();
+  };
+
+  function ensureEventTypeField() {
+    const colorRow = document.getElementById('ev-color') ? document.getElementById('ev-color').closest('.modal-row') : null;
+    if (!colorRow || document.getElementById('ev-type')) return;
+    const row = document.createElement('div');
+    row.className = 'modal-row';
+    row.innerHTML = '<select class="modal-field" id="ev-type" onchange="updateEventTypeFields(true)">' +
+      '<option value="course">Cours</option>' +
+      '<option value="sport">Sport</option>' +
+      '<option value="personal">Personnel</option>' +
+      '<option value="project">Projet</option>' +
+      '<option value="reminder">Rappel</option>' +
+      '</select>';
+    colorRow.parentNode.insertBefore(row, colorRow);
+  }
+
+  window.updateEventTypeFields = function (forceColorDefault) {
+    const type = (document.getElementById('ev-type') || {}).value || 'course';
+    const locRow = document.getElementById('ev-location-row');
+    const profRow = document.getElementById('ev-prof-row');
+    if (!locRow || !profRow) return;
+
+    const showLocation = type === 'course' || type === 'sport' || type === 'project';
+    const showProf = type === 'course';
+
+    locRow.style.display = showLocation ? 'block' : 'none';
+    profRow.style.display = showProf ? 'block' : 'none';
+
+    const locInput = document.getElementById('ev-location');
+    const profInput = document.getElementById('ev-prof');
+    if (locInput) {
+      locInput.placeholder = type === 'sport' ? 'Lieu / Club' : (type === 'project' ? 'Equipe / Salle' : 'Lieu (ex: Amphi 2)');
+    }
+    if (profInput) {
+      profInput.placeholder = 'Professeur';
+    }
+
+    const colorInput = document.getElementById('ev-color');
+    if (colorInput && forceColorDefault) {
+      colorInput.value = eventColorToHex(typeDefaultColor(type));
+    }
+  };
+
+  window.openNewEvent = function (date, time) {
+    window.__appleEditingEventId = null;
+    legacyOpenNewEvent(date, time);
+    ensureEventTypeField();
+    const typeSel = document.getElementById('ev-type');
+    if (typeSel) typeSel.value = 'course';
+    updateEventTypeFields(true);
+  };
+
+  window.editEvent = function (id) {
+    window.__appleEditingEventId = id;
+    legacyEditEvent(id);
+    ensureEventTypeField();
+    const ev = (S.calEvents || []).find(function (e) { return e.id === id; });
+    const typeSel = document.getElementById('ev-type');
+    if (typeSel) typeSel.value = (ev && ev.type) || 'course';
+    updateEventTypeFields(false);
+  };
+
+  window.saveEvent = function () {
+    const typeSel = document.getElementById('ev-type');
+    const type = typeSel ? typeSel.value : 'course';
+    const editedId = window.__appleEditingEventId;
+    legacySaveEvent();
+    if (!S.calEvents.length) return;
+    let ev = null;
+    if (editedId) {
+      ev = S.calEvents.find(function (x) { return x.id === editedId; });
+    }
+    if (!ev) {
+      ev = S.calEvents[S.calEvents.length - 1];
+    }
+    if (ev) {
+      ev.type = type;
+      ev.color = eventColorToHex(ev.color || typeDefaultColor(type));
+    }
+    window.__appleEditingEventId = null;
+    save();
+  };
+
+  window.toggleDone = function (id) {
+    const nodes = document.querySelectorAll('.task-item[onclick*="' + id + '"] .check-btn, .check-btn[onclick*="' + id + '"]');
+    nodes.forEach(function (el) {
+      el.classList.remove('ahp-bounce');
+      void el.offsetWidth;
+      el.classList.add('ahp-bounce');
+    });
+    const t = (S.tasks || []).find(function (x) { return x.id === id; });
+    if (t) {
+      const willDone = !t.done;
+      if (willDone) t.updatedAt = todayStr();
+      else t.updatedAt = '';
+    }
+    legacyToggleDone(id);
+  };
+
+  function startIndexForEvent(ev) {
+    return getSlotIndexFromTime(ev.start || getWeekRenderSlots()[0]);
+  }
+
+  function spanForEvent(ev) {
+    const slots = getWeekSlotMinutes();
+    if (!slots.length) return 1;
+    const startIdx = startIndexForEvent(ev);
+    const start = minutes(ev.start || getWeekRenderSlots()[0]);
+    const end = Math.max(start + 30, minutes(ev.end || ev.start || getWeekRenderSlots()[0]));
+    let endIdxExclusive = slots.length;
+    for (let i = startIdx + 1; i < slots.length; i++) {
+      if (end <= slots[i]) {
+        endIdxExclusive = i;
+        break;
+      }
+    }
+    return Math.max(1, endIdxExclusive - startIdx);
+  }
+
+  window.dragTaskStart = function (event, taskId) {
+    window.__dragTaskId = taskId;
+    event.dataTransfer.setData('text/task-id', taskId);
+    event.dataTransfer.effectAllowed = 'copy';
+  };
+
+  window.allowDrop = function (event) {
+    event.preventDefault();
+    if (event.currentTarget) event.currentTarget.classList.add('drop-hover');
+  };
+
+  window.clearDropHover = function (event) {
+    if (event.currentTarget) event.currentTarget.classList.remove('drop-hover');
+  };
+
+  window.dropTaskOnTask = function (event, targetTaskId) {
+    event.preventDefault();
+    if (event.currentTarget) event.currentTarget.classList.remove('drop-hover');
+    const draggedId = event.dataTransfer.getData('text/task-id') || window.__dragTaskId;
+    if (!draggedId || draggedId === targetTaskId) return;
+    const from = (S.tasks || []).findIndex(function (x) { return x.id === draggedId; });
+    const to = (S.tasks || []).findIndex(function (x) { return x.id === targetTaskId; });
+    if (from < 0 || to < 0) return;
+    const moved = S.tasks.splice(from, 1)[0];
+    const targetIndex = from < to ? to - 1 : to;
+    S.tasks.splice(targetIndex, 0, moved);
+    save();
+    toast('Ordre des taches mis a jour.');
+    renderView();
+  };
+
+  window.dropTaskOnDate = function (event, date) {
+    event.preventDefault();
+    if (event.currentTarget) event.currentTarget.classList.remove('drop-hover');
+    const id = event.dataTransfer.getData('text/task-id') || window.__dragTaskId;
+    if (!id) return;
+    const t = (S.tasks || []).find(function (x) { return x.id === id; });
+    if (!t) return;
+    t.due = date;
+    t.myDay = date === todayStr();
+    save();
+    toast('Date de tache mise a jour.');
+    renderView();
+  };
+
+  window.dropTaskOnSlot = function (event, date, time) {
+    event.preventDefault();
+    clearDropHover(event);
+    const id = event.dataTransfer.getData('text/task-id');
+    if (!id) return;
+    const t = S.tasks.find(function (x) { return x.id === id; });
+    if (!t) return;
+    t.due = date;
+    t.myDay = date === todayStr();
+    S.calEvents.push({
+      id: 'ev' + Date.now() + Math.random(),
+      title: t.name,
+      date: date,
+      start: time,
+      end: '',
+      location: '',
+      prof: '',
+      color: t.color || 'ev-green',
+      important: t.starred,
+      notes: t.notes || '',
+      type: 'project',
+      source: 'task-dnd',
+    });
+    save();
+    toast('Tache placee dans le calendrier');
+    renderView();
+  };
+
+  window.taskHTML = function (t) {
+    const html = legacyTaskHTML(t);
+    const prefix = '<div class="task-item';
+    const insert = '<div draggable="true" ondragstart="dragTaskStart(event,\'' + t.id + '\')" ondragover="allowDrop(event)" ondragleave="clearDropHover(event)" ondrop="dropTaskOnTask(event,\'' + t.id + '\')" class="task-item';
+    return html.replace(prefix, insert);
+  };
+
+  window.renderWeekGrid = function () {
+    const weekSlots = getWeekRenderSlots();
+    const days = weekDaysFrom(getCursorDate());
+    const today = todayStr();
+    const cols = 'grid-template-columns:120px repeat(' + weekSlots.length + ', minmax(88px,1fr));';
+    let html = '<div class="smart-week">';
+    html += '<div class="smart-head" style="' + cols + '"><div></div>' + weekSlots.map(function (s) { return '<div>' + slotLabel(s) + '</div>'; }).join('') + '</div>';
+
+    days.forEach(function (day) {
+      const ds = dateStr(day);
+      const events = mergeConsecutiveEvents((S.calEvents || []).filter(function (e) { return e.date === ds; }));
+      const map = {};
+      events.forEach(function (ev) {
+        const start = startIndexForEvent(ev);
+        map[start] = map[start] || [];
+        map[start].push(ev);
+      });
+
+      html += '<div class="smart-row" style="' + cols + '">';
+      html += '<div class="smart-day" onclick="S.calView=\'day\';S.calDay=\'' + ds + '\';S.calCursor=\'' + ds + '\';save();renderView()" ondrop="dropTaskOnDate(event,\'' + ds + '\')" ondragover="allowDrop(event)" ondragleave="clearDropHover(event)">' +
+        DAYS_FR[day.getDay()] + ' ' + String(day.getDate()).padStart(2, '0') + (ds === today ? ' • Aujourd\'hui' : '') + '</div>';
+
+      for (let i = 0; i < weekSlots.length; i++) {
+        const slotTime = weekSlots[i];
+        const list = map[i] || [];
+        if (list.length) {
+          const lead = list[0];
+          const span = Math.min(weekSlots.length - i, spanForEvent(lead));
+          html += '<div class="smart-cell" style="grid-column: span ' + span + ';" onclick="openNewEvent(\'' + ds + '\',\'' + slotTime + '\')" ondrop="dropTaskOnSlot(event,\'' + ds + '\',\'' + slotTime + '\')" ondragover="allowDrop(event)" ondragleave="clearDropHover(event)">' +
+            '<div class="smart-events-stack">' +
+            list.map(function (ev) {
+              return '<div class="smart-event" style="' + colorStyleInline(ev.color, 'ev-blue') + '" onclick="event.stopPropagation();editEvent(\'' + ev.id + '\')">' +
+                ev.title + '<small>' + (ev.start || '') + (ev.end ? (' - ' + ev.end) : '') + '</small></div>';
+            }).join('') +
+            '</div>' +
+            '</div>';
+          i += (span - 1);
+        } else {
+          html += '<div class="smart-cell" onclick="openNewEvent(\'' + ds + '\',\'' + slotTime + '\')" ondrop="dropTaskOnSlot(event,\'' + ds + '\',\'' + slotTime + '\')" ondragover="allowDrop(event)" ondragleave="clearDropHover(event)"></div>';
+        }
+      }
+
+      html += '</div>';
+    });
+
+    html += '</div>';
+    document.getElementById('content').innerHTML = html;
+  };
+
+  window.renderDayView = function () {
+    legacyRenderDayView();
+    const weekSlots = getWeekRenderSlots();
+    const daySlots = document.querySelectorAll('.day-slot');
+    daySlots.forEach(function (slot, idx) {
+      const targetDate = S.calDay || S.calCursor || todayStr();
+      const slotTime = weekSlots[idx] || ((window.HOURS && window.HOURS[idx]) ? window.HOURS[idx] : weekSlots[0] || '08:30');
+      slot.setAttribute('ondrop', 'dropTaskOnSlot(event,\'' + targetDate + '\',\'' + slotTime + '\')');
+      slot.setAttribute('ondragover', 'allowDrop(event)');
+      slot.setAttribute('ondragleave', 'clearDropHover(event)');
+    });
+  };
+
+  function openDayDetails(ds) {
+    const old = document.getElementById('day-detail-modal');
+    if (old) old.remove();
+    const evs = (S.calEvents || []).filter(function (e) { return e.date === ds; });
+    const tasks = (S.tasks || []).filter(function (t) { return t.due === ds && !t.done; });
+
+    const overlay = document.createElement('div');
+    overlay.id = 'day-detail-modal';
+    overlay.className = 'modal-overlay';
+    overlay.onclick = function (e) { if (e.target === overlay) overlay.remove(); };
+    overlay.innerHTML = '' +
+      '<div class="modal">' +
+      '<div class="modal-title">Details du ' + ds + '<button class="btn" onclick="document.getElementById(\'day-detail-modal\').remove()">✕</button></div>' +
+      '<div style="margin-bottom:10px">' +
+      (evs.length ? evs.map(function (e) {
+        return '<div class="agenda-item badge" style="display:block;margin-bottom:6px;' + colorStyleInline(e.color, 'ev-blue') + '">🗓 ' + (e.start || '') + ' ' + e.title + '</div>';
+      }).join('') : '<div class="agenda-empty">Aucun evenement</div>') +
+      '</div>' +
+      '<div style="margin-bottom:12px">' +
+      (tasks.length ? tasks.map(function (t) {
+        return '<div class="agenda-item task" style="display:block;margin-bottom:6px">📌 ' + t.name + '</div>';
+      }).join('') : '<div class="agenda-empty">Aucune tache due</div>') +
+      '</div>' +
+      '<div class="modal-actions" style="justify-content:space-between">' +
+      '<button class="btn" onclick="document.getElementById(\'day-detail-modal\').remove();openNewEvent(\'' + ds + '\',\'08:30\')">+ Evenement</button>' +
+      '<button class="btn btn-primary" onclick="document.getElementById(\'day-detail-modal\').remove();openQuickAdd();setTimeout(function(){var d=document.getElementById(\'qa-date\');if(d)d.value=\'' + ds + '\';},40)">+ Tache</button>' +
+      '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+  }
+
+  window.renderMonthView = function () {
+    legacyRenderMonthView();
+    document.querySelectorAll('.month-cell').forEach(function (cell) {
+      const m = cell.getAttribute('onclick') || '';
+      const hit = m.match(/openNewEvent\('([^']+)'/);
+      if (!hit) return;
+      const ds = hit[1];
+      cell.setAttribute('onclick', 'openDayDetails(\'' + ds + '\')');
+      cell.setAttribute('ondrop', 'dropTaskOnDate(event,\'' + ds + '\')');
+      cell.setAttribute('ondragover', 'allowDrop(event)');
+      cell.setAttribute('ondragleave', 'clearDropHover(event)');
+    });
+  };
+
+  window.openDayDetails = openDayDetails;
+
+  window.viewTitleMap = function () {
+    const map = legacyViewTitleMap();
+    map.goals = 'Objectifs hebdo';
+    map.import = 'Import ENSAM';
+    map.analytics = 'Analytics';
+    map.settings = 'Reglages';
+    map.search = 'Recherche';
+    return map;
+  };
+
+  window.renderView = function () {
+    applyTheme();
+    syncNavActive();
+    updateCounts();
+    const d = new Date();
+    const vd = document.getElementById('view-date');
+    if (vd) vd.textContent = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    if (S.view === 'today') {
+      updateMobileNavState();
+      return renderMyDayHub();
+    }
+    closeMyDayTaskPanel();
+    if (S.view === 'goals') {
+      updateMobileNavState();
+      return renderGoalsHub();
+    }
+    if (S.view === 'import') {
+      updateMobileNavState();
+      return renderImportHub();
+    }
+    if (S.view === 'analytics') {
+      updateMobileNavState();
+      return renderAnalytics();
+    }
+    if (S.view === 'settings') {
+      updateMobileNavState();
+      return renderSettings();
+    }
+    if (S.view === 'search') {
+      updateMobileNavState();
+      return renderSearchView();
+    }
+
+    legacyRenderView();
+    updateMobileNavState();
+  };
+
+  function registerShortcuts() {
+    document.addEventListener('keydown', function (e) {
+      const tag = String((e.target && e.target.tagName) || '').toLowerCase();
+      const typing = tag === 'input' || tag === 'textarea' || (e.target && e.target.isContentEditable);
+
+      if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k') {
+        e.preventDefault();
+        openQuickAdd();
+        return;
+      }
+
+      if (!typing && String(e.key).toLowerCase() === 'n') {
+        e.preventDefault();
+        openQuickAdd();
+        return;
+      }
+
+      if (!typing && String(e.key) === '/') {
+        e.preventDefault();
+        openQuickAdd();
+      }
+    });
+  }
+
+  function addNotificationsHint() {
+    if (!S.settings.notifications || sessionStorage.getItem('ahp-notified')) return;
+    const overdue = (S.tasks || []).filter(function (t) { return !t.done && t.due && t.due < todayStr(); }).length;
+    const todayDue = (S.tasks || []).filter(function (t) { return !t.done && t.due === todayStr(); }).length;
+    if (overdue > 0) {
+      toast('Vous avez ' + overdue + ' tache(s) en retard.');
+      notifySystem('Academic Hub Pro', 'Vous avez ' + overdue + ' tache(s) en retard.');
+    }
+    if (todayDue > 0) {
+      notifySystem('Academic Hub Pro', todayDue + ' tache(s) prevues aujourd hui.');
+    }
+    sessionStorage.setItem('ahp-notified', '1');
+  }
+
+  function ensureAdvancedNavAndShell() {
+    addSidebarToggle();
+    labelizeNavItems();
+    addNavIfMissing('nav-goals', 'goals', 'Weekly Goals', '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/><path stroke-linecap="round" d="M5 5h14M5 19h10"/>');
+    addNavIfMissing('nav-import', 'import', 'ENSAM Import', '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4"/><path stroke-linecap="round" d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>');
+    addNavIfMissing('nav-analytics', 'analytics', 'Analytics', '<path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16M7 16V8m5 8V5m5 11v-6"/>');
+    addNavIfMissing('nav-settings', 'settings', 'Settings', '<path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066 1.724 1.724 0 012.36 2.36 1.724 1.724 0 001.066 2.573 1.724 1.724 0 010 3.35 1.724 1.724 0 00-1.066 2.573 1.724 1.724 0 01-2.36 2.36 1.724 1.724 0 00-2.573 1.066 1.724 1.724 0 01-3.35 0 1.724 1.724 0 00-2.573-1.066 1.724 1.724 0 01-2.36-2.36 1.724 1.724 0 00-1.066-2.573 1.724 1.724 0 010-3.35 1.724 1.724 0 001.066-2.573 1.724 1.724 0 012.36-2.36 1.724 1.724 0 002.573-1.066z"/><circle cx="12" cy="12" r="3"/>');
+
+    if (window.VIEW_NAV_ID) {
+      window.VIEW_NAV_ID.goals = 'nav-goals';
+      window.VIEW_NAV_ID.import = 'nav-import';
+      window.VIEW_NAV_ID.analytics = 'nav-analytics';
+      window.VIEW_NAV_ID.settings = 'nav-settings';
+      window.VIEW_NAV_ID.search = 'nav-all';
+    }
+
+    ensureTopbarTools();
+    ensureMobileNav();
+    ensureFabQuickAdd();
+  }
+
+  ensureSettingsDefaults();
+  ensureGoalsStore();
+  ensureAdvancedNavAndShell();
+  ensureEventTypeField();
+  registerShortcuts();
+  applyTheme();
+  addNotificationsHint();
+  renderView();
+})();
+
