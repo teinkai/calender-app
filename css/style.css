@@ -835,3 +835,147 @@ body.sidebar-collapsed .nav-item svg {
   }
 
   .fab-quick-add { right: 14px; bottom: 86px; }}
+
+/* ── WEEKLY ACCOMPLISHMENTS JOURNAL ── */
+.accom-card {
+  position: relative;
+  overflow: hidden;
+  margin-top: 14px;
+}
+.accom-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent, #007AFF), #34C759, #FF9F0A);
+  border-radius: var(--radius-m, 14px) var(--radius-m, 14px) 0 0;
+}
+.accom-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.accom-hdr h3 { font-size: 15px; font-weight: 600; }
+.accom-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.accom-bar {
+  width: 80px; height: 5px;
+  border-radius: 999px;
+  background: var(--surface-2, var(--surface2, #f2f2f7));
+  overflow: hidden;
+}
+.accom-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent, #007AFF), #34C759);
+  transition: width 0.4s ease;
+}
+.accom-chips {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.accom-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+}
+.accom-tags {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.accom-tag {
+  padding: 4px 10px; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface-2, var(--surface2, #efeff4));
+  color: var(--text-2, var(--text2, #6e6e73));
+  font-size: 12px; cursor: pointer;
+  transition: all 0.15s;
+}
+.accom-tag:hover { transform: translateY(-1px); }
+.accom-tag.on {
+  background: rgba(0,122,255,0.12);
+  color: var(--accent, #007AFF);
+  border-color: rgba(0,122,255,0.25);
+  font-weight: 600;
+}
+.accom-input {
+  display: flex; gap: 8px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+.accom-input textarea {
+  flex: 1; min-height: 40px; max-height: 110px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2, var(--surface2, #efeff4));
+  color: var(--text);
+  font-family: inherit; font-size: 13px;
+  resize: vertical; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.accom-input textarea:focus {
+  border-color: var(--accent, #007AFF);
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+}
+.accom-list {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.accom-entry {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border);
+  transition: box-shadow 0.2s, transform 0.15s;
+  animation: accomIn 0.25s ease;
+}
+.accom-entry:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+}
+@keyframes accomIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.accom-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.accom-body { flex: 1; min-width: 0; }
+.accom-text {
+  font-size: 13px; line-height: 1.45;
+  white-space: pre-wrap; word-break: break-word;
+}
+.accom-meta {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 4px; flex-wrap: wrap;
+}
+.accom-time { font-size: 11px; color: var(--text-3, #8e8e93); }
+.accom-badge {
+  font-size: 10px; padding: 1px 7px;
+  border-radius: 20px; font-weight: 600;
+}
+.accom-acts {
+  display: flex; gap: 2px;
+  opacity: 0; transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+.accom-entry:hover .accom-acts { opacity: 1; }
+.accom-acts button {
+  background: none; border: 1px solid transparent;
+  border-radius: 6px; cursor: pointer;
+  color: var(--text-3, #8e8e93);
+  padding: 3px 5px; font-size: 12px;
+  transition: all 0.15s;
+}
+.accom-acts button:hover {
+  background: var(--hover, rgba(0,0,0,0.04));
+  border-color: var(--border);
+}
+.accom-empty {
+  text-align: center; padding: 20px 16px;
+  color: var(--text-3, #8e8e93); font-size: 13px;
+}

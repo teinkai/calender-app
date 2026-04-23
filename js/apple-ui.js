@@ -496,6 +496,28 @@
     return dateStr(base);
   }
 
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function ensureWeekAccomplishmentsStore() {
+    S.weekAccomplishments = S.weekAccomplishments || {};
+    const key = weekKey(0);
+    if (!Array.isArray(S.weekAccomplishments[key])) {
+      S.weekAccomplishments[key] = [];
+    }
+    return { key: key, list: S.weekAccomplishments[key] };
+  }
+
+  function getWeekAccomplishmentsForToday() {
+    return ensureWeekAccomplishmentsStore().list;
+  }
+
   function isCurrentWeekKey(key) {
     return String(key || '') === weekKey(0);
   }
@@ -646,6 +668,416 @@
     });
     save();
     renderView();
+  };
+
+  window.addWeekAccomplishment = function () {
+    const input = document.getElementById('accomp-inp');
+    const txt = String((input && input.value) || '').trim();
+    if (!txt) return;
+    const store = ensureWeekAccomplishmentsStore();
+    store.list.unshift({
+      id: 'ac' + Date.now() + Math.floor(Math.random() * 1000),
+      text: txt,
+      done: false,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      weekKey: store.key,
+    });
+    if (input) input.value = '';
+    save();
+    renderView();
+  };
+
+  window.toggleWeekAccomplishment = function (id) {
+    const list = getWeekAccomplishmentsForToday();
+    const item = list.find(function (x) { return x.id === id; });
+    if (!item) return;
+    item.done = !item.done;
+    item.updatedAt = Date.now();
+    save();
+    renderView();
+  };
+
+  window.deleteWeekAccomplishment = function (id) {
+    const list = getWeekAccomplishmentsForToday();
+    const idx = list.findIndex(function (x) { return x.id === id; });
+    if (idx < 0) return;
+    list.splice(idx, 1);
+    save();
+    renderView();
+  };
+
+  window.clearDoneWeekAccomplishments = function () {
+    const store = ensureWeekAccomplishmentsStore();
+    S.weekAccomplishments[store.key] = store.list.filter(function (x) { return !x.done; });
+    save();
+    renderView();
+  };
+
+  // ── RÉALISATIONS — calendar navigation ────────────────────────────────
+  // S.accompNav = { level: 'month'|'week'|'day', monthKey: 'YYYY-MM', weekKey: 'YYYY-MM-DD'(monday), dayKey: 'YYYY-MM-DD' }
+
+  function accompNavState() {
+    if (!S.accompNav) {
+      const now = new Date();
+      S.accompNav = {
+        level: 'month',
+        monthKey: now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'),
+        weekKey: weekKey(0),
+        dayKey: todayStr(),
+      };
+    }
+    return S.accompNav;
+  }
+
+  function accompDayItems(ds) {
+    S.dayNotes = S.dayNotes || {};
+    return Array.isArray(S.dayNotes[ds]) ? S.dayNotes[ds] : [];
+  }
+
+  function accompDayCard(ds, showAdd) {
+    const items = accompDayItems(ds);
+    if (!items.length && !showAdd) return '';
+    const d = new Date(ds + 'T00:00:00');
+    const label = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const isToday = ds === todayStr();
+    const inputId = 'accomp-inp-' + ds;
+    let h = '<div class="import-card" style="margin-bottom:12px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+      '<div style="font-size:13px;font-weight:600;text-transform:capitalize">' + label +
+      (isToday ? ' <span style="font-size:11px;background:var(--blue);color:#fff;padding:1px 7px;border-radius:10px;font-weight:500;vertical-align:middle">Aujourd\'hui</span>' : '') +
+      '</div>' +
+      '<span class="score-pill">' + items.length + '</span>' +
+      '</div>';
+    if (items.length) {
+      items.forEach(function (item, i) {
+        h += '<div class="task-item" style="margin-bottom:6px;cursor:default">' +
+          '<div style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:6px"></div>' +
+          '<div class="task-body"><div class="task-name">' + escapeHtml(item.text) + '</div></div>' +
+          '<div class="task-actions"><button class="icon-btn" onclick="deleteDayNote(\'' + ds + '\',' + i + ')" title="Supprimer">' +
+          '<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
+          '</button></div></div>';
+      });
+    } else {
+      h += '<div style="font-size:13px;color:var(--text3);padding:4px 0 8px">Aucune réalisation.</div>';
+    }
+    if (showAdd) {
+      h += '<div class="add-task-bar" style="margin-top:8px;margin-bottom:0">' +
+        '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--text3)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>' +
+        '<input id="' + inputId + '" placeholder="Ajouter une réalisation..." style="flex:1;border:none;outline:none;font-size:13px;background:transparent;color:var(--text)" onkeydown="if(event.key===\'Enter\')addDayNote(\'' + ds + '\',\'' + inputId + '\')" />' +
+        '<button class="btn btn-primary" onclick="addDayNote(\'' + ds + '\',\'' + inputId + '\')" style="padding:4px 12px;font-size:12px">Ajouter</button>' +
+        '</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  function renderAccomplishmentsView() {
+    S.dayNotes = S.dayNotes || {};
+    const nav = accompNavState();
+    const today = todayStr();
+    const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+    const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+    let html = '';
+
+    // ── MONTH LEVEL ────────────────────────────────────────────────────────
+    if (nav.level === 'month') {
+      const [year, month] = nav.monthKey.split('-').map(Number);
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0);
+      // Monday-based start
+      let startOffset = (firstDay.getDay() + 6) % 7;
+      const totalCells = startOffset + lastDay.getDate();
+      const rows = Math.ceil(totalCells / 7);
+
+      html += '<div class="cal-topbar" style="margin-bottom:14px">' +
+        '<button class="btn" onclick="accompShiftMonth(-1)">‹</button>' +
+        '<div class="cal-title" style="text-align:center">' + MONTHS[month - 1] + ' ' + year + '</div>' +
+        '<button class="btn" onclick="accompShiftMonth(1)" ' + (nav.monthKey >= (today.slice(0,7)) ? 'disabled style="opacity:.4"' : '') + '>›</button>' +
+        '</div>' +
+        '<div class="month-grid">';
+
+      DAYS.forEach(function (d) { html += '<div class="month-day-label">' + d + '</div>'; });
+
+      for (var ci = 0; ci < rows * 7; ci++) {
+        const dayNum = ci - startOffset + 1;
+        if (dayNum < 1 || dayNum > lastDay.getDate()) {
+          html += '<div class="month-cell other-month" style="min-height:70px"></div>';
+          continue;
+        }
+        const ds = year + '-' + String(month).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
+        const items = accompDayItems(ds);
+        const isT = ds === today;
+        const isFuture = ds > today;
+        html += '<div class="month-cell' + (isT ? ' today-cell' : '') + '" style="min-height:70px;' + (isFuture ? 'opacity:.4;pointer-events:none' : 'cursor:pointer') + '" onclick="accompDrillDay(\'' + ds + '\')">' +
+          '<div class="month-num">' + dayNum + '</div>';
+        if (items.length) {
+          html += '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">';
+          items.slice(0, 3).forEach(function () { html += '<div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>'; });
+          if (items.length > 3) html += '<div style="font-size:9px;color:var(--text3)">+' + (items.length - 3) + '</div>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+
+    // ── WEEK LEVEL ─────────────────────────────────────────────────────────
+    } else if (nav.level === 'week') {
+      const monday = new Date(nav.weekKey + 'T00:00:00');
+      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+      const prevMonday = new Date(monday); prevMonday.setDate(monday.getDate() - 7);
+      const nextMonday = new Date(monday); nextMonday.setDate(monday.getDate() + 7);
+
+      html += '<div class="cal-topbar" style="margin-bottom:14px">' +
+        '<button class="btn" onclick="accompBack()">‹ Mois</button>' +
+        '<button class="btn" onclick="accompShiftWeek(-1)">‹</button>' +
+        '<div class="cal-title" style="text-align:center;flex:1">' + weekLabel(nav.weekKey) + '</div>' +
+        '<button class="btn" onclick="accompShiftWeek(1)" ' + (dateStr(nextMonday) > today ? 'disabled style="opacity:.4"' : '') + '>›</button>' +
+        '</div>';
+
+      var hasAny = false;
+      for (var wi = 0; wi < 7; wi++) {
+        const wd = new Date(monday); wd.setDate(monday.getDate() + wi);
+        const ds = dateStr(wd);
+        if (ds > today) continue;
+        const items = accompDayItems(ds);
+        if (items.length) hasAny = true;
+        html += accompDayCard(ds, ds === today);
+      }
+      if (!hasAny) {
+        html += '<div class="import-card" style="text-align:center;padding:30px;color:var(--text3)">Aucune réalisation cette semaine.</div>';
+      }
+
+    // ── DAY LEVEL ──────────────────────────────────────────────────────────
+    } else {
+      const ds = nav.dayKey;
+      const d = new Date(ds + 'T00:00:00');
+      const prevD = new Date(d); prevD.setDate(d.getDate() - 1);
+      const nextD = new Date(d); nextD.setDate(d.getDate() + 1);
+
+      html += '<div class="cal-topbar" style="margin-bottom:14px">' +
+        '<button class="btn" onclick="accompBack()">‹ Semaine</button>' +
+        '<button class="btn" onclick="accompShiftDay(-1)">‹</button>' +
+        '<div class="cal-title" style="text-align:center;flex:1;text-transform:capitalize">' +
+        d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '</div>' +
+        '<button class="btn" onclick="accompShiftDay(1)" ' + (dateStr(nextD) > today ? 'disabled style="opacity:.4"' : '') + '>›</button>' +
+        '</div>';
+      html += accompDayCard(ds, ds === today);
+    }
+
+    document.getElementById('view-title').textContent = 'Réalisations';
+    document.getElementById('topbar-right').innerHTML = '';
+    document.getElementById('content').innerHTML = html;
+  }
+
+  window.accompDrillDay = function (ds) {
+    const monday = getMondayForDate(new Date(ds + 'T00:00:00'));
+    S.accompNav = accompNavState();
+    S.accompNav.weekKey = dateStr(monday);
+    S.accompNav.dayKey = ds;
+    S.accompNav.level = 'day';
+    save(); renderView();
+  };
+
+  window.accompBack = function () {
+    const nav = accompNavState();
+    if (nav.level === 'day') {
+      nav.level = 'week';
+    } else if (nav.level === 'week') {
+      nav.level = 'month';
+    }
+    save(); renderView();
+  };
+
+  window.accompShiftMonth = function (dir) {
+    const nav = accompNavState();
+    const [y, m] = nav.monthKey.split('-').map(Number);
+    const nd = new Date(y, m - 1 + dir, 1);
+    nav.monthKey = nd.getFullYear() + '-' + String(nd.getMonth() + 1).padStart(2, '0');
+    save(); renderView();
+  };
+
+  window.accompShiftWeek = function (dir) {
+    const nav = accompNavState();
+    const d = new Date(nav.weekKey + 'T00:00:00');
+    d.setDate(d.getDate() + dir * 7);
+    nav.weekKey = dateStr(d);
+    save(); renderView();
+  };
+
+  window.accompShiftDay = function (dir) {
+    const nav = accompNavState();
+    const d = new Date(nav.dayKey + 'T00:00:00');
+    d.setDate(d.getDate() + dir);
+    nav.dayKey = dateStr(d);
+    const monday = getMondayForDate(d);
+    nav.weekKey = dateStr(monday);
+    save(); renderView();
+  };
+
+  // ── JOURNAL ────────────────────────────────────────────────────────────
+
+  function journalNavState() {
+    if (!S.journalNav) {
+      const now = new Date();
+      S.journalNav = {
+        level: 'month',
+        monthKey: now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0'),
+        dayKey: todayStr(),
+      };
+    }
+    return S.journalNav;
+  }
+
+  function journalEntry(ds) {
+    S.journal = S.journal || {};
+    return S.journal[ds] || null;
+  }
+
+  function journalWordCount(text) {
+    return String(text || '').trim().split(/\s+/).filter(function (w) { return w.length > 0; }).length;
+  }
+
+  function renderJournalView() {
+    S.journal = S.journal || {};
+    const nav = journalNavState();
+    const today = todayStr();
+    const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+    const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+    document.getElementById('view-title').textContent = 'Journal';
+
+    // ── MONTH CALENDAR ───────────────────────────────────────────────────
+    if (nav.level === 'month') {
+      const [year, month] = nav.monthKey.split('-').map(Number);
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0);
+      const startOffset = (firstDay.getDay() + 6) % 7;
+      const rows = Math.ceil((startOffset + lastDay.getDate()) / 7);
+      const totalEntries = Object.values(S.journal).filter(function (e) { return e && String(e.text || '').trim(); }).length;
+
+      document.getElementById('topbar-right').innerHTML =
+        '<button class="btn btn-primary" onclick="journalOpenDay(\'' + today + '\')">Écrire aujourd\'hui</button>';
+
+      let html = '<div class="cal-topbar" style="margin-bottom:14px">' +
+        '<button class="btn" onclick="journalShiftMonth(-1)">‹</button>' +
+        '<div class="cal-title" style="text-align:center">' + MONTHS[month - 1] + ' ' + year + '</div>' +
+        '<button class="btn" onclick="journalShiftMonth(1)" ' + (nav.monthKey >= today.slice(0, 7) ? 'disabled style="opacity:.4"' : '') + '>›</button>' +
+        '<span class="score-pill" style="margin-left:8px">' + totalEntries + ' entrée' + (totalEntries !== 1 ? 's' : '') + '</span>' +
+        '</div>' +
+        '<div class="journal-cal-grid">';
+
+      DAYS.forEach(function (d) { html += '<div class="month-day-label">' + d + '</div>'; });
+
+      for (var ci = 0; ci < rows * 7; ci++) {
+        const dayNum = ci - startOffset + 1;
+        if (dayNum < 1 || dayNum > lastDay.getDate()) {
+          html += '<div class="journal-cell jc-other"></div>';
+          continue;
+        }
+        const ds = year + '-' + String(month).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
+        const entry = journalEntry(ds);
+        const hasEntry = entry && String(entry.text || '').trim().length > 0;
+        const isToday = ds === today;
+        const isFuture = ds > today;
+        const preview = hasEntry ? String(entry.text).trim().replace(/\n/g, ' ').slice(0, 60) : '';
+
+        html += '<div class="journal-cell' +
+          (isToday ? ' jc-today' : '') +
+          (hasEntry ? ' jc-has-entry' : '') +
+          (isFuture ? ' jc-future' : '') +
+          '" onclick="journalOpenDay(\'' + ds + '\')">' +
+          '<div class="jc-num">' + dayNum + '</div>' +
+          (preview ? '<div class="jc-preview">' + escapeHtml(preview) + '</div>' : '') +
+          '</div>';
+      }
+      html += '</div>';
+      document.getElementById('content').innerHTML = html;
+
+    // ── DAY EDITOR ──────────────────────────────────────────────────────
+    } else {
+      const ds = nav.dayKey;
+      const d = new Date(ds + 'T00:00:00');
+      const prevD = new Date(d); prevD.setDate(d.getDate() - 1);
+      const nextD = new Date(d); nextD.setDate(d.getDate() + 1);
+      const entry = journalEntry(ds) || { text: '', updatedAt: null };
+      const words = journalWordCount(entry.text);
+      const isToday = ds === today;
+      const dateLabel = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      document.getElementById('topbar-right').innerHTML =
+        '<button class="btn" onclick="journalBack()">‹ Calendrier</button>' +
+        '<button class="btn" onclick="journalShiftDay(-1)">‹</button>' +
+        '<button class="btn" onclick="journalShiftDay(1)" ' + (dateStr(nextD) > today ? 'disabled style="opacity:.4"' : '') + '>›</button>';
+
+      const savedLabel = entry.updatedAt
+        ? 'Sauvegardé à ' + new Date(entry.updatedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        : 'Non sauvegardé';
+
+      const html = '<div class="journal-editor-wrap">' +
+        '<div class="journal-editor-header">' +
+        '<div class="journal-editor-date">' + dateLabel + (isToday ? ' <span style="font-size:13px;background:var(--blue);color:#fff;padding:2px 9px;border-radius:10px;font-weight:500;vertical-align:middle">Aujourd\'hui</span>' : '') + '</div>' +
+        '<div class="journal-editor-meta">' +
+        '<span id="journal-wordcount">' + words + ' mot' + (words !== 1 ? 's' : '') + '</span>' +
+        '<span id="journal-saved">' + savedLabel + '</span>' +
+        '</div>' +
+        '</div>' +
+        '<div class="journal-paper">' +
+        '<textarea class="journal-textarea" id="journal-textarea" placeholder="Écris ici ta journée, tes pensées, tes notes..." oninput="journalAutoSave(\'' + ds + '\',this.value)">' + escapeHtml(entry.text || '') + '</textarea>' +
+        '</div>' +
+        '</div>';
+
+      document.getElementById('content').innerHTML = html;
+      const ta = document.getElementById('journal-textarea');
+      if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+    }
+  }
+
+  var _journalSaveTimer = null;
+  window.journalAutoSave = function (ds, val) {
+    const wc = document.getElementById('journal-wordcount');
+    const words = journalWordCount(val);
+    if (wc) wc.textContent = words + ' mot' + (words !== 1 ? 's' : '');
+    const saved = document.getElementById('journal-saved');
+    if (saved) saved.textContent = 'En cours...';
+    clearTimeout(_journalSaveTimer);
+    _journalSaveTimer = setTimeout(function () {
+      S.journal = S.journal || {};
+      S.journal[ds] = { text: val, updatedAt: Date.now() };
+      save();
+      if (saved) saved.textContent = 'Sauvegardé à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }, 600);
+  };
+
+  window.journalOpenDay = function (ds) {
+    const nav = journalNavState();
+    nav.dayKey = ds;
+    nav.level = 'day';
+    const [y, m] = ds.split('-');
+    nav.monthKey = y + '-' + m;
+    save(); renderView();
+  };
+
+  window.journalBack = function () {
+    journalNavState().level = 'month';
+    save(); renderView();
+  };
+
+  window.journalShiftMonth = function (dir) {
+    const nav = journalNavState();
+    const [y, m] = nav.monthKey.split('-').map(Number);
+    const nd = new Date(y, m - 1 + dir, 1);
+    nav.monthKey = nd.getFullYear() + '-' + String(nd.getMonth() + 1).padStart(2, '0');
+    save(); renderView();
+  };
+
+  window.journalShiftDay = function (dir) {
+    const nav = journalNavState();
+    const d = new Date(nav.dayKey + 'T00:00:00');
+    d.setDate(d.getDate() + dir);
+    nav.dayKey = dateStr(d);
+    save(); renderView();
   };
 
   function renderImportHub() {
@@ -957,9 +1389,8 @@
       '<span class="score-pill">Focus ' + Math.max(10, Math.min(100, 100 - overdue * 10)) + '/100</span>' +
       '</div>' +
       '</div>' +
-      '<div class="stats-row" style="margin-bottom:12px">' +
+      '<div class="stats-row" style="margin-bottom:12px;grid-template-columns:repeat(3,1fr)">' +
       '<div class="stat-card blue"><div class="stat-val">' + dayEvents.length + '</div><div class="stat-lbl">Evenements du jour</div></div>' +
-      '<div class="stat-card green"><div class="stat-val">' + dayTasks.length + '</div><div class="stat-lbl">Taches actives</div></div>' +
       '<div class="stat-card amber"><div class="stat-val">' + doneGoals + '/' + weekGoals.length + '</div><div class="stat-lbl">Objectifs semaine</div></div>' +
       '<div class="stat-card red"><div class="stat-val">' + overdue + '</div><div class="stat-lbl">En retard</div></div>' +
       '</div>' +
@@ -1010,6 +1441,50 @@
       }).join('') : '<div class="empty-state" style="padding:12px">Aucune tache active pour aujourd\'hui.</div>') +
       '</div>';
 
+    // Week accomplishments (Mon → today)
+    S.dayNotes = S.dayNotes || {};
+    const monday = getMondayOf(0);
+    const weekDays = [];
+    for (var wi = 0; wi < 7; wi++) {
+      var wd = new Date(monday);
+      wd.setDate(wd.getDate() + wi);
+      var wds = dateStr(wd);
+      if (wds <= today) weekDays.push(wds);
+    }
+    const weekItems = weekDays.reduce(function (acc, ds) {
+      return acc.concat((S.dayNotes[ds] || []).map(function (n) { return { ds: ds, text: n.text, createdAt: n.createdAt, idx: (S.dayNotes[ds] || []).indexOf(n) }; }));
+    }, []);
+
+    html += '' +
+      '<div class="import-card" style="margin-top:12px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+      '<h3 style="font-size:13px;font-weight:600">Réalisations de la semaine</h3>' +
+      (weekItems.length ? '<span class="score-pill">' + weekItems.length + '</span>' : '') +
+      '</div>' +
+      '<button class="btn" style="font-size:11px;padding:3px 9px" onclick="gotoView(\'accomplishments\',document.getElementById(\'nav-accomplishments\'))">Voir tout</button>' +
+      '</div>' +
+      (weekItems.length
+        ? weekItems.map(function (item) {
+            var dayLbl = new Date(item.ds + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+            return '<div class="task-item" style="margin-bottom:6px;cursor:default">' +
+              '<div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px"></div>' +
+              '<div class="task-body">' +
+              '<div class="task-name">' + escapeHtml(item.text) + '</div>' +
+              '<div class="task-meta"><span class="tag" style="background:var(--green-l);color:#065f46">' + dayLbl + '</span></div>' +
+              '</div>' +
+              '<div class="task-actions"><button class="icon-btn" onclick="deleteDayNote(\'' + item.ds + '\',' + item.idx + ')" title="Supprimer">' +
+              '<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
+              '</button></div></div>';
+          }).join('')
+        : '<div style="font-size:13px;color:var(--text3);padding:6px 0 10px">Aucune réalisation cette semaine.</div>') +
+      '<div class="add-task-bar" style="margin-top:8px;margin-bottom:0">' +
+      '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--text3)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>' +
+      '<input id="day-note-inp" placeholder="Ajouter une réalisation d\'aujourd\'hui..." style="flex:1;border:none;outline:none;font-size:13px;background:transparent;color:var(--text)" onkeydown="if(event.key===\'Enter\')addDayNote(\'' + today + '\')" />' +
+      '<button class="btn btn-primary" onclick="addDayNote(\'' + today + '\')" style="padding:4px 12px;font-size:12px">Ajouter</button>' +
+      '</div>' +
+      '</div>';
+
     document.getElementById('content').innerHTML = html;
     if (S.myDayExpandedTaskId) {
       renderMyDayTaskPanel(S.myDayExpandedTaskId);
@@ -1024,6 +1499,27 @@
     panel.classList.add('hidden');
     S.myDayExpandedTaskId = null;
   }
+
+  window.addDayNote = function (dateKey, inputId) {
+    const inp = document.getElementById(inputId || 'day-note-inp');
+    const txt = String((inp && inp.value) || '').trim();
+    if (!txt) return;
+    S.dayNotes = S.dayNotes || {};
+    if (!Array.isArray(S.dayNotes[dateKey])) S.dayNotes[dateKey] = [];
+    S.dayNotes[dateKey].push({ text: txt, createdAt: Date.now() });
+    if (inp) inp.value = '';
+    save();
+    renderView();
+  };
+
+  window.deleteDayNote = function (dateKey, idx) {
+    S.dayNotes = S.dayNotes || {};
+    const list = S.dayNotes[dateKey];
+    if (!list) return;
+    list.splice(idx, 1);
+    save();
+    renderView();
+  };
 
   function renderMyDayTaskPanel(taskId) {
     const panel = document.getElementById('detail-panel');
@@ -1479,6 +1975,8 @@
   window.viewTitleMap = function () {
     const map = legacyViewTitleMap();
     map.goals = 'Objectifs hebdo';
+    map.accomplishments = 'Réalisations';
+    map.journal = 'Journal';
     map.import = 'Import ENSAM';
     map.analytics = 'Analytics';
     map.settings = 'Reglages';
@@ -1502,6 +2000,14 @@
     if (S.view === 'goals') {
       updateMobileNavState();
       return renderGoalsHub();
+    }
+    if (S.view === 'accomplishments') {
+      updateMobileNavState();
+      return renderAccomplishmentsView();
+    }
+    if (S.view === 'journal') {
+      updateMobileNavState();
+      return renderJournalView();
     }
     if (S.view === 'import') {
       updateMobileNavState();
@@ -1572,6 +2078,8 @@
 
     if (window.VIEW_NAV_ID) {
       window.VIEW_NAV_ID.goals = 'nav-goals';
+      window.VIEW_NAV_ID.accomplishments = 'nav-accomplishments';
+      window.VIEW_NAV_ID.journal = 'nav-journal';
       window.VIEW_NAV_ID.import = 'nav-import';
       window.VIEW_NAV_ID.analytics = 'nav-analytics';
       window.VIEW_NAV_ID.settings = 'nav-settings';

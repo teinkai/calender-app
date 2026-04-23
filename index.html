@@ -304,6 +304,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .empty-state{text-align:center;padding:40px;color:var(--text3)}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+/* ── JOURNAL ── */
+.journal-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.journal-cell{background:var(--surface);min-height:80px;padding:8px;cursor:pointer;transition:background .15s;position:relative}
+.journal-cell:hover{background:var(--blue-l)}
+.journal-cell.jc-today{background:var(--blue-l)}
+.journal-cell.jc-has-entry{border-left:3px solid var(--amber)}
+.journal-cell.jc-other{opacity:.4;pointer-events:none}
+.journal-cell.jc-future{opacity:.3;pointer-events:none}
+.jc-num{font-size:12px;font-weight:600;margin-bottom:4px}
+.jc-today .jc-num{background:var(--blue);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px}
+.jc-preview{font-size:10px;color:var(--text3);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.journal-editor-wrap{display:flex;flex-direction:column;height:calc(100vh - 120px);max-width:720px;margin:0 auto}
+.journal-editor-header{margin-bottom:18px}
+.journal-editor-date{font-size:22px;font-weight:700;color:var(--text);text-transform:capitalize;margin-bottom:4px}
+.journal-editor-meta{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:12px}
+.journal-textarea{flex:1;width:100%;border:none;outline:none;background:transparent;font-size:15px;line-height:1.8;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;resize:none;padding:0}
+.journal-textarea::placeholder{color:var(--text3)}
+.journal-paper{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 32px;display:flex;flex-direction:column;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden}
 </style>
 <link rel="stylesheet" href="css/style.css"/>
 </head>
@@ -345,6 +363,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="nav-item" id="nav-ideas" onclick="gotoView('ideas',this)">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
         Idées & Notes <span class="cnt" id="cnt-ideas"></span>
+      </div>
+      <div class="nav-item" id="nav-accomplishments" onclick="gotoView('accomplishments',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Réalisations <span class="cnt" id="cnt-accomplishments"></span>
+      </div>
+      <div class="nav-item" id="nav-journal" onclick="gotoView('journal',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        Journal <span class="cnt" id="cnt-journal"></span>
       </div>
     </div>
   </div>
@@ -506,6 +532,11 @@ function updateCounts(){
   set('cnt-imp',a.filter(x=>x.starred).length);
   set('cnt-all',a.length);
   set('cnt-ideas',S.ideas.length);
+  const dayNotes=S.dayNotes||{};
+  const totalNotes=Object.values(dayNotes).reduce(function(acc,arr){return acc+(Array.isArray(arr)?arr.length:0);},0);
+  set('cnt-accomplishments',totalNotes||'');
+  const journalEntries=Object.values(S.journal||{}).filter(function(e){return e&&String(e.text||'').trim().length>0;}).length;
+  set('cnt-journal',journalEntries||'');
 }
 
 // ─── RENDER ROUTER ────────────────────────────────────────────────────
