@@ -323,58 +323,152 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .journal-textarea::placeholder{color:var(--text3)}
 .journal-paper{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 32px;display:flex;flex-direction:column;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden}
 </style>
+<link rel="stylesheet" href="design-system/tokens.css"/>
+<link rel="stylesheet" href="design-system/components.css"/>
 <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
 
 <div class="sidebar">
+
+  <!-- ── Top: Logo + Spotlight Search ── -->
   <div class="sidebar-top">
     <div class="app-title">
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-      Academic Hub
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ds-accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="4"/>
+        <path d="M8 12l3 3 5-5"/>
+      </svg>
+      <span>Academic Hub</span>
     </div>
     <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input id="search-inp" type="text" placeholder="Rechercher..." oninput="S.searchQ=this.value;renderView()"/>
+      <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input id="search-inp" type="text" placeholder="Rechercher…" oninput="S.searchQ=this.value;renderView()"/>
     </div>
   </div>
+
+  <!-- ── Navigation ── -->
   <div class="sidebar-nav">
+
+    <!-- Focus -->
     <div class="nav-section">
-      <div class="nav-label">Tâches</div>
+      <div class="nav-label">Focus</div>
+
       <div class="nav-item active" id="nav-today" onclick="gotoView('today',this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        Ma journée <span class="cnt" id="cnt-today"></span>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="4.5"/>
+          <path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+        <span class="nav-txt">Ma journée</span>
+        <span class="cnt" id="cnt-today"></span>
       </div>
+
       <div class="nav-item" id="nav-important" onclick="gotoView('important',this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-        Important <span class="cnt" id="cnt-imp"></span>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+        </svg>
+        <span class="nav-txt">Important</span>
+        <span class="cnt" id="cnt-imp"></span>
       </div>
+
       <div class="nav-item" id="nav-all" onclick="gotoView('all',this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
-        Toutes <span class="cnt" id="cnt-all"></span>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h10"/>
+        </svg>
+        <span class="nav-txt">Toutes les tâches</span>
+        <span class="cnt" id="cnt-all"></span>
       </div>
     </div>
+
+    <!-- Productivité -->
     <div class="nav-section">
-      <div class="nav-label">Autres</div>
+      <div class="nav-label">Productivité</div>
+
+      <div class="nav-item" id="nav-goals" onclick="gotoView('goals',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          <path stroke-linecap="round" d="M5 5h14M5 19h10"/>
+        </svg>
+        <span class="nav-txt">Weekly Goals</span>
+      </div>
+
       <div class="nav-item" id="nav-calendar" onclick="gotoView('calendar',this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Calendrier
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span class="nav-txt">Calendrier</span>
       </div>
+
+      <div class="nav-item" id="nav-analytics" onclick="gotoView('analytics',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16M7 16V8m5 8V5m5 11v-6"/>
+        </svg>
+        <span class="nav-txt">Analytics</span>
+      </div>
+    </div>
+
+    <!-- Contenu -->
+    <div class="nav-section">
+      <div class="nav-label">Contenu</div>
+
       <div class="nav-item" id="nav-ideas" onclick="gotoView('ideas',this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-        Idées & Notes <span class="cnt" id="cnt-ideas"></span>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        <span class="nav-txt">Idées & Notes</span>
+        <span class="cnt" id="cnt-ideas"></span>
       </div>
+
       <div class="nav-item" id="nav-accomplishments" onclick="gotoView('accomplishments',this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        Réalisations <span class="cnt" id="cnt-accomplishments"></span>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="nav-txt">Réalisations</span>
+        <span class="cnt" id="cnt-accomplishments"></span>
       </div>
+
       <div class="nav-item" id="nav-journal" onclick="gotoView('journal',this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-        Journal <span class="cnt" id="cnt-journal"></span>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        <span class="nav-txt">Journal</span>
+        <span class="cnt" id="cnt-journal"></span>
+      </div>
+
+      <div class="nav-item" id="nav-import" onclick="gotoView('import',this)">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4"/>
+          <path stroke-linecap="round" d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+        </svg>
+        <span class="nav-txt">ENSAM Import</span>
+      </div>
+    </div>
+
+  </div><!-- /sidebar-nav -->
+
+  <!-- ── Footer: Settings + Profile ── -->
+  <div class="sidebar-footer">
+    <div class="nav-item" id="nav-settings" onclick="gotoView('settings',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066 1.724 1.724 0 012.36 2.36 1.724 1.724 0 001.066 2.573 1.724 1.724 0 010 3.35 1.724 1.724 0 00-1.066 2.573 1.724 1.724 0 01-2.36 2.36 1.724 1.724 0 00-2.573 1.066 1.724 1.724 0 01-3.35 0 1.724 1.724 0 00-2.573-1.066 1.724 1.724 0 01-2.36-2.36 1.724 1.724 0 00-1.066-2.573 1.724 1.724 0 010-3.35 1.724 1.724 0 001.066-2.573 1.724 1.724 0 012.36-2.36 1.724 1.724 0 002.573-1.066z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span class="nav-txt">Réglages</span>
+    </div>
+    <div class="sidebar-profile">
+      <div class="profile-avatar">N</div>
+      <div class="profile-info">
+        <div class="profile-name">Noussair</div>
+        <div class="profile-status">Étudiant ENSAM</div>
       </div>
     </div>
   </div>
-</div>
+
+</div><!-- /sidebar -->
 
 <div class="main">
   <div class="topbar">
