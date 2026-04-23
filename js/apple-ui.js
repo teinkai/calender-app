@@ -1755,12 +1755,29 @@
       el.classList.add('ahp-bounce');
     });
     const t = (S.tasks || []).find(function (x) { return x.id === id; });
+    var willDone = false;
     if (t) {
-      const willDone = !t.done;
+      willDone = !t.done;
       if (willDone) t.updatedAt = todayStr();
       else t.updatedAt = '';
     }
     legacyToggleDone(id);
+
+    // Auto-sync : tâche terminée → Réalisations du jour (et retrait si décochée)
+    if (t) {
+      const today = todayStr();
+      S.dayNotes = S.dayNotes || {};
+      if (!Array.isArray(S.dayNotes[today])) S.dayNotes[today] = [];
+      if (willDone) {
+        const already = S.dayNotes[today].some(function (n) { return n.taskId === id; });
+        if (!already) {
+          S.dayNotes[today].push({ text: t.name, createdAt: Date.now(), taskId: id, autoFromTask: true });
+        }
+      } else {
+        S.dayNotes[today] = S.dayNotes[today].filter(function (n) { return n.taskId !== id; });
+      }
+      save();
+    }
   };
 
   function startIndexForEvent(ev) {
