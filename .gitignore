@@ -1,6 +1,26 @@
-# Include your project-specific ignores in this file
-# Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
-# Useful .gitignore templates: https://github.com/github/gitignore
+# Dependencies
 node_modules
+
+# Build output
 dist
 .cache
+
+# IDE files
+.idea
+*.iml
+
+# Editor backup files
+*.css~
+*.js~
+*.html~
+
+# Python virtual env & cache
+python_ai/.venv
+python_ai/__pycache__
+**/__pycache__
+**/*.pyc
+**/*.pyd
+
+# OS
+.DS_Store
+Thumbs.db

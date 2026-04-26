@@ -459,11 +459,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </svg>
       <span class="nav-txt">Réglages</span>
     </div>
-    <div class="sidebar-profile">
-      <div class="profile-avatar">N</div>
+    <div class="sidebar-profile" onclick="editProfileName()" title="Cliquer pour modifier votre nom" style="cursor:pointer">
+      <div class="profile-avatar" id="profile-avatar">?</div>
       <div class="profile-info">
-        <div class="profile-name">Noussair</div>
-        <div class="profile-status">Étudiant ENSAM</div>
+        <div class="profile-name" id="profile-name">Étudiant</div>
+        <div class="profile-status" id="profile-status">Academic Hub Pro</div>
       </div>
     </div>
   </div>
@@ -524,7 +524,8 @@ var S={
   tasks:[],weekGoals:[],weekGoalsNext:[],
   calEvents:[],ideas:[],ideaLabels:[],
   view:'today',selectedTask:null,activeWeek:'current',
-  calView:'week',calOffset:0,calDay:'',calCursor:'',searchQ:''
+  calView:'week',calOffset:0,calDay:'',calCursor:'',searchQ:'',
+  userName:'',userStatus:'Academic Hub Pro'
 };
 window.S=S;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -2092,8 +2093,26 @@ function delLabel(id){
   save();renderView();
 }
 
+// ─── PROFILE ──────────────────────────────────────────────────────────
+function updateProfileUI(){
+  const name=S.userName||'Étudiant';
+  const el=document.getElementById('profile-name');
+  const av=document.getElementById('profile-avatar');
+  if(el) el.textContent=name;
+  if(av) av.textContent=name.charAt(0).toUpperCase()||'É';
+}
+function editProfileName(){
+  const name=prompt('Votre prénom ou pseudo:',S.userName||'');
+  if(name===null) return;
+  S.userName=name.trim()||'Étudiant';
+  save();
+  updateProfileUI();
+}
+window.editProfileName=editProfileName;
+
 // ─── INIT ─────────────────────────────────────────────────────────────
 load();
+updateProfileUI();
 if(!VIEW_NAV_ID[S.view]) S.view='today';
 if(!S.lastOpen) S.lastOpen=todayStr();
 if(!S.calCursor) S.calCursor=todayStr();

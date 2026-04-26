@@ -1376,116 +1376,199 @@
     const weekGoals = getWeekGoalsForToday();
     const doneGoals = weekGoals.filter(function (g) { return g.done; }).length;
     const overdue = (S.tasks || []).filter(function (t) { return !t.done && t.due && t.due < today; }).length;
+    const focusScore = Math.max(10, Math.min(100, 100 - overdue * 10));
+    const goalsPct = weekGoals.length ? Math.round((doneGoals / weekGoals.length) * 100) : 0;
 
-    document.getElementById('view-title').textContent = 'My Day';
-    document.getElementById('topbar-right').innerHTML = '' +
-      '<button class="btn" onclick="openNewEvent(\'' + today + '\',\'08:30\')">+ Evenement</button>';
+    document.getElementById('view-title').textContent = 'Ma journée';
+    document.getElementById('topbar-right').innerHTML =
+      '<button class="btn btn-primary" onclick="openQuickAddTodayTask()">+ Tâche</button>' +
+      '<button class="btn" onclick="openNewEvent(\'' + today + '\',\'08:30\')">+ Événement</button>';
 
-    const todayLabel = new Date(today + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-    let html = '' +
-      '<div class="import-card" style="margin-bottom:14px">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">' +
-      '<div><div style="font-size:12px;color:var(--text-3)">Vue intelligente du jour</div><div style="font-size:20px;font-weight:600;text-transform:capitalize">' + todayLabel + '</div></div>' +
-      '<span class="score-pill">Focus ' + Math.max(10, Math.min(100, 100 - overdue * 10)) + '/100</span>' +
-      '</div>' +
-      '</div>' +
-      '<div class="stats-row" style="margin-bottom:12px;grid-template-columns:repeat(3,1fr)">' +
-      '<div class="stat-card blue"><div class="stat-val">' + dayEvents.length + '</div><div class="stat-lbl">Evenements du jour</div></div>' +
-      '<div class="stat-card amber"><div class="stat-val">' + doneGoals + '/' + weekGoals.length + '</div><div class="stat-lbl">Objectifs semaine</div></div>' +
-      '<div class="stat-card red"><div class="stat-val">' + overdue + '</div><div class="stat-lbl">En retard</div></div>' +
-      '</div>' +
-      '<div class="analytics-grid" style="grid-template-columns:1.2fr 1fr">';
+    // Labels
+    const rawLabel = new Date(today + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const todayLabel = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
+    const nowTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-    html += '' +
-      '<div class="import-card">' +
-      '<h3 style="margin-bottom:8px">Timeline du jour</h3>' +
-      (dayEvents.length ? dayEvents.map(function (e) {
-        return '<div class="agenda-item badge" style="display:block;margin-bottom:8px;' + colorStyleInline(e.color, 'ev-blue') + '">' +
-          '<strong>' + (e.start || '--:--') + (e.end ? (' - ' + e.end) : '') + '</strong> • ' + e.title +
-          (e.location ? ('<div style="font-size:11px;opacity:.8">' + e.location + '</div>') : '') +
-          '</div>';
-      }).join('') : '<div class="empty-state" style="padding:12px">Aucun evenement aujourd\'hui.</div>') +
-      '</div>';
+    // Focus ring SVG (r=34, cx=cy=40, circumference≈213.6)
+    var R = 34, CX = 40, CY = 40;
+    var circ = +(2 * Math.PI * R).toFixed(1);
+    var offset = +((1 - focusScore / 100) * circ).toFixed(1);
+    var ringColor = focusScore >= 70 ? 'var(--ds-green)' : focusScore >= 40 ? 'var(--ds-orange)' : 'var(--ds-red)';
 
-    html += '' +
-      '<div class="import-card">' +
-      '<h3 style="margin-bottom:8px">Objectifs de la semaine</h3>' +
-      (weekGoals.length ? weekGoals.map(function (g, i) {
-        return '<div class="wg-item ' + (g.done ? 'wg-done' : '') + '">' +
-          '<div class="check-btn ' + (g.done ? 'checked' : '') + '" onclick="toggleTodayGoal(' + i + ')"></div>' +
-          '<span>' + g.text + '</span>' +
-          '</div>';
-      }).join('') : '<div class="empty-state" style="padding:12px">Aucun objectif pour cette semaine.</div>') +
-      '<div style="margin-top:10px"><button class="btn" onclick="gotoView(\'goals\',document.getElementById(\'nav-goals\'))">Gerer les objectifs</button></div>' +
-      '</div>';
-
-    html += '</div>';
-
-    html += '' +
-      '<div class="import-card" style="margin-top:12px">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">' +
-      '<h3>Taches du jour (suivi)</h3>' +
-      '<div style="display:flex;align-items:center;gap:8px">' +
-      '<span class="score-pill">' + dayTasks.length + '</span>' +
-      '<button class="btn" onclick="openQuickAddTodayTask()">+ Nouvelle tache</button>' +
-      '</div>' +
-      '</div>' +
-      (dayTasks.length ? dayTasks.map(function (t) {
-        const st = t.plannedStart || '08:00';
-        const en = t.plannedEnd || '10:00';
-        return '<div class="sub-item" style="padding:10px 12px;margin-bottom:6px;gap:10px">' +
-          '<span style="font-weight:600;min-width:96px">' + st + ' - ' + en + '</span>' +
-          '<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + t.name + '</span>' +
-          '<button class="btn" style="padding:4px 10px" onclick="openMyDayTaskPanel(\'' + t.id + '\')">Etendre</button>' +
-          '</div>';
-      }).join('') : '<div class="empty-state" style="padding:12px">Aucune tache active pour aujourd\'hui.</div>') +
-      '</div>';
-
-    // Week accomplishments (Mon → today)
-    S.dayNotes = S.dayNotes || {};
-    const monday = getMondayOf(0);
-    const weekDays = [];
-    for (var wi = 0; wi < 7; wi++) {
-      var wd = new Date(monday);
-      wd.setDate(wd.getDate() + wi);
-      var wds = dateStr(wd);
-      if (wds <= today) weekDays.push(wds);
+    // ── Timeline event helper ────────────────────────────────────────
+    function tlEvent(e) {
+      var hex = eventColorToHex(e.color || 'ev-blue');
+      var bgHex = hex + '14';
+      return '<div class="myday-tl-item" onclick="editEvent(\'' + e.id + '\')" style="border-left-color:' + hex + ';background:' + bgHex + '">' +
+        '<div class="myday-tl-time">' +
+          '<span class="myday-tl-pill" style="background:' + hex + '22;color:' + hex + '">' + (e.start || '--:--') + '</span>' +
+          (e.end ? '<span class="myday-tl-end">→ ' + e.end + '</span>' : '') +
+        '</div>' +
+        '<div class="myday-tl-title">' + e.title + '</div>' +
+        (e.location ? '<div class="myday-tl-loc">📍 ' + e.location + '</div>' : '') +
+        '</div>';
     }
-    const weekItems = weekDays.reduce(function (acc, ds) {
-      return acc.concat((S.dayNotes[ds] || []).map(function (n) { return { ds: ds, text: n.text, createdAt: n.createdAt, idx: (S.dayNotes[ds] || []).indexOf(n) }; }));
-    }, []);
 
-    html += '' +
-      '<div class="import-card" style="margin-top:12px">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">' +
-      '<div style="display:flex;align-items:center;gap:8px">' +
-      '<h3 style="font-size:13px;font-weight:600">Réalisations de la semaine</h3>' +
-      (weekItems.length ? '<span class="score-pill">' + weekItems.length + '</span>' : '') +
+    // ── Task row helper ──────────────────────────────────────────────
+    function taskRow(t) {
+      var st = t.plannedStart || '08:00';
+      var en = t.plannedEnd || '10:00';
+      return '<div class="myday-task-row' + (t.done ? ' myday-task-done' : '') + '">' +
+        '<div class="check-btn ' + (t.done ? 'checked' : '') + '" onclick="toggleDone(\'' + t.id + '\')"></div>' +
+        '<div class="myday-task-body">' +
+          '<div class="myday-task-name">' + t.name + '</div>' +
+          '<span class="myday-task-time">' + st + ' – ' + en + '</span>' +
+        '</div>' +
+        '<button class="myday-task-expand" onclick="openMyDayTaskPanel(\'' + t.id + '\')" title="Détails">' +
+          '<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>' +
+        '</button>' +
+        '</div>';
+    }
+
+    // ── Goal row helper ──────────────────────────────────────────────
+    function goalRow(g, i) {
+      return '<div class="myday-goal-row' + (g.done ? ' myday-goal-done' : '') + '">' +
+        '<div class="check-btn ' + (g.done ? 'checked' : '') + '" onclick="toggleTodayGoal(' + i + ')"></div>' +
+        '<span class="myday-goal-text">' + g.text + '</span>' +
+        '</div>';
+    }
+
+    // ── Empty state helper ───────────────────────────────────────────
+    function emptyBlock(icon, text, btnLabel, btnAction) {
+      return '<div class="myday-empty">' + icon +
+        '<div>' + text + '</div>' +
+        (btnLabel ? '<button class="btn btn-primary" style="margin-top:10px;height:32px;font-size:12px" onclick="' + btnAction + '">' + btnLabel + '</button>' : '') +
+        '</div>';
+    }
+
+    // ── Stat card color ──────────────────────────────────────────────
+    var overdueClass = overdue > 0 ? 'myday-stat-red' : 'myday-stat-green';
+    var overdueIcon  = overdue > 0 ? '<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>' : '<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+
+    var html =
+
+      // ════════════════ HERO ════════════════
+      '<div class="myday-hero">' +
+        '<div class="myday-hero-info">' +
+          '<div class="myday-greeting">Bonjour, ' + ((window.S && window.S.userName) || 'Étudiant') + '</div>' +
+          '<div class="myday-date">' + todayLabel + '</div>' +
+          '<div class="myday-clock" id="myday-clock">' + nowTime + '</div>' +
+        '</div>' +
+        '<div class="myday-ring-wrap">' +
+          '<svg width="80" height="80" viewBox="0 0 80 80" style="display:block">' +
+            '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="none" stroke="var(--ds-bg-tertiary)" stroke-width="6"/>' +
+            '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="none" stroke="' + ringColor + '" stroke-width="6"' +
+              ' stroke-linecap="round"' +
+              ' stroke-dasharray="' + circ + '"' +
+              ' stroke-dashoffset="' + offset + '"' +
+              ' transform="rotate(-90 ' + CX + ' ' + CY + ')"' +
+              ' style="transition:stroke-dashoffset .7s cubic-bezier(0.4,0,0.2,1)"/>' +
+          '</svg>' +
+          '<div class="myday-ring-center">' +
+            '<div class="myday-ring-score">' + focusScore + '</div>' +
+            '<div class="myday-ring-lbl">focus</div>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
-      '<button class="btn" style="font-size:11px;padding:3px 9px" onclick="gotoView(\'accomplishments\',document.getElementById(\'nav-accomplishments\'))">Voir tout</button>' +
+
+      // ════════════════ STATS ════════════════
+      '<div class="myday-stats">' +
+        '<div class="myday-stat myday-stat-blue">' +
+          '<div class="myday-stat-icon">' +
+            '<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>' +
+          '</div>' +
+          '<div><div class="myday-stat-val">' + dayEvents.length + '</div><div class="myday-stat-lbl">Événements</div></div>' +
+        '</div>' +
+        '<div class="myday-stat myday-stat-amber">' +
+          '<div class="myday-stat-icon">' +
+            '<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' +
+          '</div>' +
+          '<div><div class="myday-stat-val">' + doneGoals + '<span class="myday-stat-sub">/' + weekGoals.length + '</span></div><div class="myday-stat-lbl">Objectifs</div></div>' +
+        '</div>' +
+        '<div class="myday-stat ' + overdueClass + '">' +
+          '<div class="myday-stat-icon">' + overdueIcon + '</div>' +
+          '<div><div class="myday-stat-val">' + overdue + '</div><div class="myday-stat-lbl">' + (overdue > 0 ? 'En retard' : 'À jour') + '</div></div>' +
+        '</div>' +
       '</div>' +
-      (weekItems.length
-        ? weekItems.map(function (item) {
-            var dayLbl = new Date(item.ds + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
-            return '<div class="task-item" style="margin-bottom:6px;cursor:default">' +
-              '<div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px"></div>' +
-              '<div class="task-body">' +
-              '<div class="task-name">' + escapeHtml(item.text) + '</div>' +
-              '<div class="task-meta"><span class="tag" style="background:var(--green-l);color:#065f46">' + dayLbl + '</span></div>' +
-              '</div>' +
-              '<div class="task-actions"><button class="icon-btn" onclick="deleteDayNote(\'' + item.ds + '\',' + item.idx + ')" title="Supprimer">' +
-              '<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
-              '</button></div></div>';
-          }).join('')
-        : '<div style="font-size:13px;color:var(--text3);padding:6px 0 10px">Aucune réalisation cette semaine.</div>') +
-      '<div class="add-task-bar" style="margin-top:8px;margin-bottom:0">' +
-      '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--text3)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>' +
-      '<input id="day-note-inp" placeholder="Ajouter une réalisation d\'aujourd\'hui..." style="flex:1;border:none;outline:none;font-size:13px;background:transparent;color:var(--text)" onkeydown="if(event.key===\'Enter\')addDayNote(\'' + today + '\')" />' +
-      '<button class="btn btn-primary" onclick="addDayNote(\'' + today + '\')" style="padding:4px 12px;font-size:12px">Ajouter</button>' +
-      '</div>' +
+
+      // ════════════════ MAIN GRID ════════════════
+      '<div class="myday-grid">' +
+
+        // ── Timeline ──
+        '<div class="myday-panel">' +
+          '<div class="myday-panel-hdr">' +
+            '<span class="myday-panel-title">' +
+              '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>' +
+              ' Timeline du jour' +
+            '</span>' +
+            '<button class="btn" style="height:28px;font-size:12px;padding:0 10px" onclick="openNewEvent(\'' + today + '\',\'08:30\')">+ Événement</button>' +
+          '</div>' +
+          '<div class="myday-timeline">' +
+            (dayEvents.length ? dayEvents.map(tlEvent).join('') :
+              emptyBlock(
+                '<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" style="opacity:.25;margin-bottom:6px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>',
+                'Aucun événement aujourd\'hui',
+                'Planifier',
+                'openNewEvent(\'' + today + '\',\'08:30\')'
+              )
+            ) +
+          '</div>' +
+        '</div>' +
+
+        // ── Tâches ──
+        '<div class="myday-panel">' +
+          '<div class="myday-panel-hdr">' +
+            '<span class="myday-panel-title">' +
+              '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7l-3 3-1.5-1.5"/></svg>' +
+              ' Tâches du jour' +
+            '</span>' +
+            (dayTasks.length ? '<span class="score-pill" style="font-size:11px">' + dayTasks.filter(function(t){return t.done;}).length + '/' + dayTasks.length + '</span>' : '') +
+          '</div>' +
+          '<div class="myday-tasks-list">' +
+            (dayTasks.length ? dayTasks.map(taskRow).join('') :
+              emptyBlock(
+                '<svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" style="opacity:.25;margin-bottom:6px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>',
+                'Aucune tâche planifiée',
+                'Ajouter une tâche',
+                'openQuickAddTodayTask()'
+              )
+            ) +
+          '</div>' +
+        '</div>' +
+
+      '</div>' + // /myday-grid
+
+      // ════════════════ OBJECTIFS ════════════════
+      '<div class="myday-goals-panel">' +
+        '<div class="myday-goals-hdr">' +
+          '<span class="myday-panel-title">' +
+            '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' +
+            ' Objectifs de la semaine' +
+          '</span>' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+            (weekGoals.length ? '<span style="font-size:12px;color:var(--ds-text-tertiary);font-weight:500">' + goalsPct + '%</span>' : '') +
+            '<button class="btn" style="height:28px;font-size:12px;padding:0 10px" onclick="gotoView(\'goals\',document.getElementById(\'nav-goals\'))">Gérer</button>' +
+          '</div>' +
+        '</div>' +
+        (weekGoals.length ?
+          '<div class="myday-goals-track"><div class="myday-goals-fill" style="width:' + goalsPct + '%"></div></div>' : '') +
+        '<div class="myday-goals-list">' +
+          (weekGoals.length ? weekGoals.map(goalRow).join('') :
+            '<div style="font-size:13px;color:var(--ds-text-tertiary);padding:6px 0">Aucun objectif — <button class="btn" style="height:26px;font-size:12px;padding:0 10px;display:inline-flex" onclick="gotoView(\'goals\',document.getElementById(\'nav-goals\'))">En créer un</button></div>'
+          ) +
+        '</div>' +
       '</div>';
 
     document.getElementById('content').innerHTML = html;
+
+    // Live clock (refreshes every 30 s)
+    clearInterval(window._mydayClock);
+    window._mydayClock = setInterval(function () {
+      var el = document.getElementById('myday-clock');
+      if (!el) { clearInterval(window._mydayClock); return; }
+      el.textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }, 30000);
+
     if (S.myDayExpandedTaskId) {
       renderMyDayTaskPanel(S.myDayExpandedTaskId);
     } else {
