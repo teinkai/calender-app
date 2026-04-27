@@ -227,4 +227,4 @@ Feel free to fork it, strip out the ENSAM-specific parts, adapt it to your own s
 ---
 
 *Built by Noussair Fenani — ENSAM student, 2026*  
-*Developed with [Claude](https://claude.ai) (Anthropic)*
+
