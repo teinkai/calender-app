@@ -210,14 +210,6 @@ Clearing your browser's site data will erase everything. Use **Settings → Expo
 
 ---
 
-## Built with Claude
-
-This project was developed in collaboration with [Claude](https://claude.ai) by Anthropic. Claude helped design the architecture, implement the calendar and task sync logic, build the Apple-inspired CSS design system, write the ENSAM PDF parser, and iterate on every feature based on real daily use.
-
-The development process was conversational and hands-on: describe what I wanted, Claude implemented it, I tested it in the browser, we refined together. Every feature in this app came from actual daily frustration or a genuine need — nothing was added for the sake of it.
-
----
-
 ## Personal project
 
 This app is built for my personal use. I'm sharing it publicly because the approach — a zero-dependency, single-file academic productivity tool that runs entirely in the browser — might be useful to someone else.
@@ -226,5 +218,5 @@ Feel free to fork it, strip out the ENSAM-specific parts, adapt it to your own s
 
 ---
 
-*Built by Noussair Fenani — ENSAM student, 2026*  
+*Noussair Fenani — ENSAM student, 2026*
 
