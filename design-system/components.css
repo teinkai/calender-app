@@ -1,0 +1,423 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Academic Hub Pro — Reusable Components
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Card ───────────────────────────────────────────────────────── */
+.ds-card {
+  background: var(--ds-bg-primary);
+  border-radius: var(--ds-r-md);
+  box-shadow: var(--ds-shadow-card);
+  padding: var(--ds-sp-5);
+  border: 0.5px solid var(--ds-border-subtle);
+}
+
+.ds-card-elevated {
+  background: var(--ds-bg-primary);
+  border-radius: var(--ds-r-md);
+  box-shadow: var(--ds-shadow-elevated);
+  padding: var(--ds-sp-5);
+}
+
+.ds-card:hover,
+.ds-card-hover:hover {
+  box-shadow: var(--ds-shadow-elevated);
+  transform: translateY(-1px);
+  transition:
+    box-shadow var(--ds-dur-normal) var(--ds-ease),
+    transform  var(--ds-dur-normal) var(--ds-ease);
+}
+
+/* ─── Segmented Control ──────────────────────────────────────────── */
+.ds-segmented {
+  display: inline-flex;
+  background: var(--ds-bg-tertiary);
+  border-radius: var(--ds-r-sm);
+  padding: 2px;
+  gap: 2px;
+}
+
+.ds-segmented-item {
+  flex: 1;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-size: var(--ds-sz-subhead);
+  font-weight: var(--ds-w-medium);
+  color: var(--ds-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition:
+    background var(--ds-dur-fast) var(--ds-ease),
+    color      var(--ds-dur-fast) var(--ds-ease),
+    box-shadow var(--ds-dur-fast) var(--ds-ease);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ds-segmented-item.active {
+  background: var(--ds-bg-primary);
+  color: var(--ds-text-primary);
+  box-shadow: var(--ds-shadow-nav-active);
+}
+
+/* ─── Progress Bar ───────────────────────────────────────────────── */
+.ds-progress-track {
+  height: 4px;
+  border-radius: var(--ds-r-full);
+  background: var(--ds-bg-tertiary);
+  overflow: hidden;
+}
+
+.ds-progress-fill {
+  height: 100%;
+  border-radius: var(--ds-r-full);
+  background: linear-gradient(90deg, var(--ds-accent), #5AC8FA);
+  transition: width var(--ds-dur-slow) var(--ds-ease);
+}
+
+.ds-progress-track-lg {
+  height: 8px;
+  border-radius: var(--ds-r-full);
+  background: var(--ds-bg-tertiary);
+  overflow: hidden;
+}
+
+/* ─── Badge / Pill ───────────────────────────────────────────────── */
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--ds-r-full);
+  font-size: var(--ds-sz-caption);
+  font-weight: var(--ds-w-semibold);
+  background: var(--ds-bg-tertiary);
+  color: var(--ds-text-secondary);
+  line-height: 1;
+}
+
+.ds-badge-accent {
+  background: var(--ds-accent-bg);
+  color: var(--ds-accent);
+}
+
+.ds-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--ds-r-full);
+  font-size: var(--ds-sz-subhead);
+  font-weight: var(--ds-w-medium);
+  background: var(--ds-accent-bg);
+  color: var(--ds-accent);
+}
+
+/* ─── Grouped List (iOS Reminders style) ─────────────────────────── */
+.ds-list-grouped {
+  background: var(--ds-bg-primary);
+  border-radius: var(--ds-r-md);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-card);
+  border: 0.5px solid var(--ds-border-subtle);
+}
+
+.ds-list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 0.5px solid var(--ds-separator);
+  transition: background var(--ds-dur-fast) var(--ds-ease);
+}
+
+.ds-list-row:last-child {
+  border-bottom: none;
+}
+
+.ds-list-row:hover {
+  background: var(--ds-bg-hover);
+}
+
+/* ─── Checkbox (iOS Round) ───────────────────────────────────────── */
+.ds-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ds-border-medium);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    border-color var(--ds-dur-fast) var(--ds-ease),
+    background   var(--ds-dur-fast) var(--ds-ease);
+}
+
+.ds-check:hover {
+  border-color: var(--ds-accent);
+}
+
+.ds-check.checked {
+  background: var(--ds-accent);
+  border-color: var(--ds-accent);
+}
+
+.ds-check.checked::after {
+  content: '';
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-46deg) translate(1px, -1px);
+  display: block;
+}
+
+/* ─── Timeline Item ──────────────────────────────────────────────── */
+.ds-timeline {
+  position: relative;
+  padding-left: 20px;
+}
+
+.ds-timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 12px;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--ds-separator);
+  border-radius: 2px;
+}
+
+.ds-timeline-item {
+  position: relative;
+  padding: 10px 14px 10px 16px;
+  margin-bottom: 8px;
+  background: var(--ds-bg-primary);
+  border-radius: var(--ds-r-sm);
+  box-shadow: var(--ds-shadow-card);
+  border-left: 3px solid var(--ds-accent);
+}
+
+.ds-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -19px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ds-accent);
+  border: 2px solid var(--ds-bg-sidebar);
+}
+
+/* ─── Section Label ──────────────────────────────────────────────── */
+.ds-section-label {
+  font-size: var(--ds-sz-caption);
+  font-weight: var(--ds-w-semibold);
+  color: var(--ds-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 8px;
+  margin-bottom: 4px;
+  margin-top: 8px;
+}
+
+/* ─── Stat Card ──────────────────────────────────────────────────── */
+.ds-stat-card {
+  background: var(--ds-bg-primary);
+  border-radius: var(--ds-r-md);
+  padding: 16px;
+  box-shadow: var(--ds-shadow-card);
+  border: 0.5px solid var(--ds-border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ds-stat-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ds-r-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.ds-stat-value {
+  font-size: 28px;
+  font-weight: var(--ds-w-semibold);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.ds-stat-label {
+  font-size: var(--ds-sz-caption);
+  font-weight: var(--ds-w-medium);
+  color: var(--ds-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Ring Progress (Apple Health style) ─────────────────────────── */
+.ds-ring {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.ds-ring svg {
+  transform: rotate(-90deg);
+}
+
+.ds-ring-track {
+  fill: none;
+  stroke: var(--ds-bg-tertiary);
+}
+
+.ds-ring-fill {
+  fill: none;
+  stroke: var(--ds-accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--ds-dur-slow) var(--ds-ease);
+}
+
+.ds-ring-label {
+  position: absolute;
+  font-size: var(--ds-sz-subhead);
+  font-weight: var(--ds-w-semibold);
+  color: var(--ds-text-primary);
+  text-align: center;
+}
+
+/* ─── Chart Bar Horizontal ────────────────────────────────────────── */
+.ds-chart-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 40px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ds-chart-label {
+  font-size: var(--ds-sz-subhead);
+  color: var(--ds-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ds-chart-track {
+  height: 6px;
+  border-radius: var(--ds-r-full);
+  background: var(--ds-bg-tertiary);
+  overflow: hidden;
+}
+
+.ds-chart-fill {
+  height: 100%;
+  border-radius: var(--ds-r-full);
+  background: linear-gradient(90deg, var(--ds-accent), #5AC8FA);
+  transition: width 0.6s var(--ds-ease);
+}
+
+.ds-chart-value {
+  font-size: var(--ds-sz-subhead);
+  font-weight: var(--ds-w-semibold);
+  color: var(--ds-text-primary);
+  text-align: right;
+}
+
+/* ─── Input Field ────────────────────────────────────────────────── */
+.ds-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  background: var(--ds-bg-input);
+  border: 1px solid transparent;
+  border-radius: var(--ds-r-sm);
+  font-family: var(--ds-font);
+  font-size: var(--ds-sz-subhead);
+  color: var(--ds-text-primary);
+  outline: none;
+  transition:
+    border-color var(--ds-dur-fast) var(--ds-ease),
+    box-shadow   var(--ds-dur-fast) var(--ds-ease),
+    background   var(--ds-dur-fast) var(--ds-ease);
+}
+
+.ds-input:focus {
+  border-color: var(--ds-accent);
+  background: var(--ds-bg-primary);
+  box-shadow: 0 0 0 3px var(--ds-accent-subtle);
+}
+
+.ds-input::placeholder {
+  color: var(--ds-text-placeholder);
+}
+
+/* ─── Empty State ────────────────────────────────────────────────── */
+.ds-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ds-text-tertiary);
+}
+
+.ds-empty-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.ds-empty-text {
+  font-size: var(--ds-sz-subhead);
+  font-weight: var(--ds-w-medium);
+}
+
+/* ─── Toast ──────────────────────────────────────────────────────── */
+.ds-toast {
+  background: var(--ds-bg-primary);
+  border: 0.5px solid var(--ds-border-medium);
+  color: var(--ds-text-primary);
+  border-radius: var(--ds-r-sm);
+  padding: 10px 16px;
+  font-size: var(--ds-sz-subhead);
+  font-weight: var(--ds-w-medium);
+  box-shadow: var(--ds-shadow-float);
+  animation: ds-toast-in 200ms var(--ds-ease-spring) both;
+}
+
+@keyframes ds-toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Utility: transitions ───────────────────────────────────────── */
+.ds-transition {
+  transition: all var(--ds-dur-normal) var(--ds-ease);
+}
+
+.ds-transition-fast {
+  transition: all var(--ds-dur-fast) var(--ds-ease);
+}
+
+/* ─── Scrollbar (iOS style) ──────────────────────────────────────── */
+.ds-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+.ds-scroll::-webkit-scrollbar-thumb {
+  background: var(--ds-border-medium);
+  border-radius: 4px;
+}
+.ds-scroll::-webkit-scrollbar-track { background: transparent; }

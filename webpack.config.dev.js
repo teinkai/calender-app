@@ -9,12 +9,12 @@ module.exports = merge(common, {
     liveReload: true,
     hot: true,
     open: false,
-    port: 8080,
+    port: 57901,
     static: ['./'],
     proxy: [
       {
         context: ['/extract-schedule', '/health'],
-        target: 'http://localhost:8765',
+        target: 'http://localhost:56999',
       },
     ],
   },

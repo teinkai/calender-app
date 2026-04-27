@@ -14,8 +14,8 @@ app = FastAPI(title="ENSAM Schedule Extractor", version="2.1.0")
 app.add_middleware(
   CORSMiddleware,
   allow_origins=[
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
+    "http://localhost:57901",
+    "http://127.0.0.1:57901",
     "http://localhost",
     "http://127.0.0.1",
   ],

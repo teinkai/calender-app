@@ -7,6 +7,8 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $frontendPath = $projectRoot
 $backendPath = Join-Path $projectRoot "python_ai"
+$backendPort = 56999
+$frontendPort = 57901
 
 function Test-PortListening {
   param([int]$Port)
@@ -32,17 +34,17 @@ function Start-HiddenPowerShell {
 }
 
 if (-not $NoBackend) {
-  $backendRunning = Test-PortListening -Port 8765
+  $backendRunning = Test-PortListening -Port $backendPort
   if (-not $backendRunning) {
     $venvActivate = Join-Path $backendPath ".venv\Scripts\Activate.ps1"
     if (Test-Path $venvActivate) {
-      $backendCommand = "Set-Location '$backendPath'; . '$venvActivate'; uvicorn app:app --host 127.0.0.1 --port 8765"
+      $backendCommand = "Set-Location '$backendPath'; . '$venvActivate'; uvicorn app:app --host 127.0.0.1 --port $backendPort"
       Start-HiddenPowerShell -Command $backendCommand
     } else {
-      $backendCommand = "Set-Location '$backendPath'; python -m uvicorn app:app --host 127.0.0.1 --port 8765"
+      $backendCommand = "Set-Location '$backendPath'; python -m uvicorn app:app --host 127.0.0.1 --port $backendPort"
       Start-HiddenPowerShell -Command $backendCommand
     }
-    [void](Wait-Port -Port 8765 -TimeoutMs 6000)
+    [void](Wait-Port -Port $backendPort -TimeoutMs 6000)
   }
 }
 
@@ -54,7 +56,7 @@ if (-not $frontRunning) {
   Start-HiddenPowerShell -Command $frontCommand
 }
 
-[void](Wait-Port -Port 8080 -TimeoutMs 10000)
+[void](Wait-Port -Port $frontendPort -TimeoutMs 10000)
 
 $edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
 if (-not (Test-Path $edge)) {
@@ -62,8 +64,8 @@ if (-not (Test-Path $edge)) {
 }
 
 if (Test-Path $edge) {
-  Start-Process $edge "--app=http://localhost:8080"
+  Start-Process $edge "--app=http://localhost:$frontendPort"
 } else {
-  Start-Process "http://localhost:8080"
+  Start-Process "http://localhost:$frontendPort"
 }
 
